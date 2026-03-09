@@ -1,9 +1,9 @@
-import Login from "./entrada/page";
+//import Login from "./entrada/page";
 
 export default function Home() {
   return (
     <div>
-      <Login/>
+      <h1>Landing Page</h1>
     </div>
   );
 }
