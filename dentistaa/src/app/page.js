@@ -1,5 +1,9 @@
-// import Login from "./entrada/page";
+"use client"; // Importante: esto es un Client Component
+
+import { useRouter } from "next/navigation";
+
 export default function Home() {
+  const router = useRouter();
   return (
     <>
       {/* NAV */}
@@ -11,17 +15,26 @@ export default function Home() {
 
         <ul className="flex items-center gap-10">
           <li>
-            <a className="text-sm font-medium uppercase tracking-wider hover:text-[var(--main_blue)] transition-colors duration-300 cursor-pointer" href="#servicios">
+            <a
+              className="text-sm font-medium uppercase tracking-wider hover:text-[var(--main_blue)] transition-colors duration-300 cursor-pointer"
+              href="#servicios"
+            >
               Servicios
             </a>
           </li>
           <li>
-            <a className="text-sm font-medium uppercase tracking-wider hover:text-[var(--main_blue)] transition-colors duration-300 cursor-pointer" href="#ubicacion">
+            <a
+              className="text-sm font-medium uppercase tracking-wider hover:text-[var(--main_blue)] transition-colors duration-300 cursor-pointer"
+              href="#ubicacion"
+            >
               Ubicación
             </a>
           </li>
           <li>
-            <button className="bg-[var(--main_blue)] text-[var(--main_black)] px-6 py-2.5 rounded-full text-sm font-semibold hover:bg-opacity-90 transition-all duration-300 shadow-lg shadow-[var(--main_blue)]/20 cursor-pointer">
+            <button
+              className="bg-[var(--main_blue)] text-[var(--main_black)] px-6 py-2.5 rounded-full text-sm font-semibold hover:bg-opacity-90 transition-all duration-300 shadow-lg shadow-[var(--main_blue)]/20 cursor-pointer"
+              onClick={() => router.push("/entrada")}
+            >
               Agendar cita
             </button>
           </li>
@@ -49,7 +62,9 @@ export default function Home() {
               Con los mejores especialistas y tecnología moderna para brindarte
               la mejor experiencia dental.
             </p>
-            <button className="group bg-gradient-to-r from-[var(--main_blue)] to-[#4AC7FF] text-[var(--main_black)] px-8 py-4 rounded-full font-semibold hover:shadow-xl hover:scale-105 transition-all duration-300 cursor-pointer flex items-center gap-2">
+            <button className="group bg-gradient-to-r from-[var(--main_blue)] to-[#4AC7FF] text-[var(--main_black)] px-8 py-4 rounded-full font-semibold hover:shadow-xl hover:scale-105 transition-all duration-300 cursor-pointer flex items-center gap-2"
+              onClick={() => router.push("/entrada")}
+            >
               Reserva online
               <svg
                 className="w-5 h-5 group-hover:translate-x-1 transition-transform"
@@ -78,7 +93,10 @@ export default function Home() {
         </section>
 
         {/* SERVICIOS */}
-        <section className="px-8 py-28 bg-gradient-to-b from-[var(--light_gray)] to-[var(--main_gray)]" id="servicios">
+        <section
+          className="px-8 py-28 bg-gradient-to-b from-[var(--light_gray)] to-[var(--main_gray)]"
+          id="servicios"
+        >
           <div className="max-w-7xl mx-auto">
             <div className="text-center mb-20">
               <h2 className="text-4xl font-bold text-[var(--main_blue)] mb-4">
@@ -233,12 +251,18 @@ export default function Home() {
               </h4>
               <ul className="space-y-2 text-sm text-[var(--white)]/60">
                 <li>
-                  <a className="hover:text-[var(--main_blue)] transition-colors cursor-pointer" href="#servicios">
+                  <a
+                    className="hover:text-[var(--main_blue)] transition-colors cursor-pointer"
+                    href="#servicios"
+                  >
                     Servicios
                   </a>
                 </li>
                 <li>
-                  <a className="hover:text-[var(--main_blue)] transition-colors cursor-pointer" href="#ubicacion">
+                  <a
+                    className="hover:text-[var(--main_blue)] transition-colors cursor-pointer"
+                    href="#ubicacion"
+                  >
                     Ubicación
                   </a>
                 </li>

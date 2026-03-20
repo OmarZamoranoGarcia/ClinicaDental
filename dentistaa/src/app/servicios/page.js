@@ -1,5 +1,5 @@
 "use client";
-import Image from "next/image";
+
 import Sidebar from "@/components/barralateral/sidebar";
 import { useState, useEffect } from "react";
 
@@ -11,7 +11,8 @@ export default function Servicios() {
 
   // Cargar los servicios desde el localStorage cuando la página se carga
   useEffect(() => {
-    const serviciosGuardados = JSON.parse(localStorage.getItem("servicios")) || [];
+    const serviciosGuardados =
+      JSON.parse(localStorage.getItem("servicios")) || [];
     setServicios(serviciosGuardados);
   }, []);
 
@@ -44,7 +45,10 @@ export default function Servicios() {
   // Función para iniciar la edición de un servicio
   const editarServicio = (id) => {
     const servicioParaEditar = servicios.find((s) => s.id === id);
-    setNuevoServicio({ tipo: servicioParaEditar.tipo, costo: servicioParaEditar.costo });
+    setNuevoServicio({
+      tipo: servicioParaEditar.tipo,
+      costo: servicioParaEditar.costo,
+    });
     setEditando(id);
   };
 
@@ -54,8 +58,12 @@ export default function Servicios() {
     if (nuevoServicio.tipo && nuevoServicio.costo) {
       const serviciosActualizados = servicios.map((servicio) =>
         servicio.id === editando
-          ? { ...servicio, tipo: nuevoServicio.tipo, costo: nuevoServicio.costo }
-          : servicio
+          ? {
+              ...servicio,
+              tipo: nuevoServicio.tipo,
+              costo: nuevoServicio.costo,
+            }
+          : servicio,
       );
       guardarServicios(serviciosActualizados);
       setNuevoServicio({ tipo: "", costo: "" });
@@ -64,44 +72,131 @@ export default function Servicios() {
   };
 
   return (
-    <div className="flex h-screen bg-[#FFFFFF] text-black">
+    <div
+      className="flex h-screen"
+      style={{ backgroundColor: "var(--main_black)", color: "var(--white)" }}
+    >
       <Sidebar />
 
       {/* Contenido principal */}
       <main className="flex-1 py-5 px-20 relative">
         {/* Logo */}
-        <div className="absolute top-1 right-10 p-2 text-center">
-          <Image src="/diennnn.jpg" alt="logo" width={50} height={300} />
-        </div>
+        <div className="absolute top-1 right-10 p-2 text-center"></div>
 
         {/* Título */}
-        <h1 className="text-2xl font-bold mb-6">SERVICIOS</h1>
+        <h1
+          className="text-2xl font-bold mb-6"
+          style={{ color: "var(--white)" }}
+        >
+          SERVICIOS
+        </h1>
 
         {/* Tabla de servicios */}
-        <div className="overflow-x-auto border border-gray-600 shadow-xl rounded-lg mb-10">
+        <div
+          className="overflow-x-auto shadow-xl rounded-lg mb-10"
+          style={{
+            border: `1px solid var(--main_blue)`,
+            backgroundColor: "var(--main_gray)",
+          }}
+        >
           <table className="min-w-full border-collapse text-left">
-            <thead className="bg-[#147DA8] text-white">
+            <thead
+              style={{
+                backgroundColor: "var(--main_blue)",
+                color: "var(--white)",
+              }}
+            >
               <tr>
-                <th className="p-3 border-b border-gray-400">Tipo de Servicio</th>
-                <th className="p-3 border-b border-gray-400">Costo</th>
-                <th className="p-3 border-b border-gray-400 text-center">Acciones</th>
+                <th
+                  className="p-3 border-b"
+                  style={{ borderColor: "var(--main_gray)" }}
+                >
+                  Tipo de Servicio
+                </th>
+                <th
+                  className="p-3 border-b"
+                  style={{ borderColor: "var(--main_gray)" }}
+                >
+                  Costo
+                </th>
+                <th
+                  className="p-3 border-b text-center"
+                  style={{ borderColor: "var(--main_gray)" }}
+                >
+                  Acciones
+                </th>
               </tr>
             </thead>
             <tbody>
               {servicios.map((servicio) => (
-                <tr key={servicio.id} className="hover:bg-gray-100">
-                  <td className="p-3 border-b border-gray-300">{servicio.tipo}</td>
-                  <td className="p-3 border-b border-gray-300">{servicio.costo}</td>
-                  <td className="p-3 border-b border-gray-300 text-center space-x-2">
+                <tr
+                  key={servicio.id}
+                  className="hover:bg-opacity-80 transition-colors"
+                  style={{
+                    backgroundColor: "var(--light_gray)",
+                    color: "var(--white)",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = "#2A2F3A";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = "var(--light_gray)";
+                  }}
+                >
+                  <td
+                    className="p-3 border-b"
+                    style={{ borderColor: "var(--main_gray)" }}
+                  >
+                    {servicio.tipo}
+                  </td>
+                  <td
+                    className="p-3 border-b"
+                    style={{ borderColor: "var(--main_gray)" }}
+                  >
+                    {servicio.costo}
+                  </td>
+                  <td
+                    className="p-3 border-b text-center space-x-2"
+                    style={{ borderColor: "var(--main_gray)" }}
+                  >
                     <button
                       onClick={() => editarServicio(servicio.id)}
-                      className="px-3 py-1 bg-[#147DA8] text-white rounded hover:bg-[#125f83]"
+                      className="px-3 py-1 text-white rounded transition-all duration-300 transform hover:scale-105"
+                      style={{
+                        backgroundColor: "var(--main_blue)",
+                        boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.3)",
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = "#60D6A7";
+                        e.currentTarget.style.boxShadow =
+                          "0 10px 15px -3px rgba(0, 0, 0, 0.4)";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor =
+                          "var(--main_blue)";
+                        e.currentTarget.style.boxShadow =
+                          "0 4px 6px -1px rgba(0, 0, 0, 0.3)";
+                      }}
                     >
                       Editar
                     </button>
                     <button
                       onClick={() => eliminarServicio(servicio.id)}
-                      className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-700"
+                      className="px-3 py-1 text-white rounded transition-all duration-300 transform hover:scale-105"
+                      style={{
+                        backgroundColor: "#DC2626",
+                        boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.3)",
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = "#EF4444";
+                        e.currentTarget.style.boxShadow =
+                          "0 10px 15px -3px rgba(0, 0, 0, 0.4)";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = "#DC2626";
+                        e.currentTarget.style.boxShadow =
+                          "0 4px 6px -1px rgba(0, 0, 0, 0.3)";
+                      }}
                     >
                       Eliminar
                     </button>
@@ -113,8 +208,19 @@ export default function Servicios() {
         </div>
 
         {/* Formulario para añadir o editar servicios */}
-        <div className="border border-gray-400 rounded-lg shadow-lg p-6 w-2/3">
-          <h2 className="text-xl font-semibold mb-4 text-[#147DA8]">
+        <div
+          className="rounded-lg shadow-xl p-6 w-2/3 transition-all duration-300"
+          style={{
+            border: `1px solid var(--main_blue)`,
+            backgroundColor: "var(--main_gray)",
+            boxShadow:
+              "0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2)",
+          }}
+        >
+          <h2
+            className="text-xl font-semibold mb-4"
+            style={{ color: "var(--main_blue)" }}
+          >
             {editando ? "Editar Servicio" : "Añadir Nuevo Servicio"}
           </h2>
           <form
@@ -128,7 +234,13 @@ export default function Servicios() {
               onChange={(e) =>
                 setNuevoServicio({ ...nuevoServicio, tipo: e.target.value })
               }
-              className="border border-gray-400 rounded-lg p-2 flex-1 focus:outline-none focus:ring-2 focus:ring-[#147DA8]"
+              className="rounded-lg p-2 flex-1 focus:outline-none focus:ring-2 transition-all duration-300"
+              style={{
+                border: `1px solid var(--main_blue)`,
+                color: "var(--white)",
+                backgroundColor: "var(--light_gray)",
+                boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.3)",
+              }}
               required
             />
             <input
@@ -138,12 +250,32 @@ export default function Servicios() {
               onChange={(e) =>
                 setNuevoServicio({ ...nuevoServicio, costo: e.target.value })
               }
-              className="border border-gray-400 rounded-lg p-2 w-40 focus:outline-none focus:ring-2 focus:ring-[#147DA8]"
+              className="rounded-lg p-2 w-40 focus:outline-none focus:ring-2 transition-all duration-300"
+              style={{
+                border: `1px solid var(--main_blue)`,
+                color: "var(--white)",
+                backgroundColor: "var(--light_gray)",
+                boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.3)",
+              }}
               required
             />
             <button
               type="submit"
-              className="bg-[#147DA8] text-white font-semibold rounded-lg px-6 py-2 hover:bg-[#125f83]"
+              className="text-white font-semibold rounded-lg px-6 py-2 transition-all duration-300 transform hover:scale-105"
+              style={{
+                backgroundColor: "var(--main_blue)",
+                boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.3)",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = "#60D6A7";
+                e.currentTarget.style.boxShadow =
+                  "0 10px 15px -3px rgba(0, 0, 0, 0.4)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = "var(--main_blue)";
+                e.currentTarget.style.boxShadow =
+                  "0 4px 6px -1px rgba(0, 0, 0, 0.3)";
+              }}
             >
               {editando ? "Guardar Cambios" : "Agregar"}
             </button>

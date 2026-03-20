@@ -1,6 +1,9 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 import { Poppins } from "next/font/google";
+import { useRouter } from "next/navigation";
 
 // Fuente Poppins: limpia, moderna y profesional
 const poppins = Poppins({
@@ -9,14 +12,24 @@ const poppins = Poppins({
 });
 
 export default function Login() {
+  const router = useRouter();
+
+  const handleCreateAccount = () => {
+    router.push("/registro"); // Cambia esta ruta según tu necesidad
+  };
+
   return (
-    <div className="flex h-screen bg-[#A3CCDA] items-center justify-center p-5">
-      
+    <div
+      className="flex h-screen items-center justify-center p-5"
+      style={{ backgroundColor: "var(--light_gray)" }}
+    >
       {/* Contenedor principal */}
-      <div className="flex w-full max-w-6xl h-[80vh] shadow-lg rounded overflow-hidden">
-        
+      <div
+        className="flex w-full max-w-6xl h-[80vh] shadow-lg rounded overflow-hidden"
+        style={{ backgroundColor: "var(--main_gray)" }}
+      >
         {/* Columna de la imagen */}
-        <div className="flex-1 bg-gray-100 relative flex items-center justify-center p-5">
+        <div className="flex-1 relative flex items-center justify-center p-5">
           <Image
             src="/logindiente.png"
             alt="Imagen lateral"
@@ -26,13 +39,20 @@ export default function Login() {
         </div>
 
         {/* Columna del formulario */}
-        <div className="flex-1 flex items-center justify-center p-8 bg-white">
+        <div
+          className="flex-1 flex items-center justify-center p-8"
+          style={{ backgroundColor: "var(--main_gray)" }}
+        >
           <div className="w-full max-w-sm space-y-6">
-
             {/* Título principal con fuente Poppins y gradiente */}
             <div className="text-center mb-6">
               <label
-                className={`${poppins.className} block text-6xl font-extrabold bg-linear-to-r from-[#147DA8] to-[#60D6A7] bg-clip-text text-transparent drop-shadow-lg tracking-wide relative -top-15`}
+                className={`${poppins.className} block text-6xl font-extrabold bg-clip-text text-transparent drop-shadow-lg tracking-wide relative -top-15`}
+                style={{
+                  backgroundImage: `linear-gradient(to right, var(--main_blue), #60D6A7)`,
+                  WebkitBackgroundClip: "text",
+                  backgroundClip: "text",
+                }}
               >
                 ING DENTAL
               </label>
@@ -40,36 +60,128 @@ export default function Login() {
 
             {/* Campo de usuario */}
             <div>
-              <label className="block mb-2 text-black font-semibold">USUARIO</label>
+              <label
+                className="block mb-2 font-semibold"
+                style={{ color: "var(--white)" }}
+              >
+                USUARIO
+              </label>
               <input
                 type="text"
                 placeholder="Ej. Alvaro Casas"
-                className="w-full bg-transparent border border-gray-400 rounded p-2 focus:outline-none text-black shadow-sm"
+                className="w-full rounded p-2 focus:outline-none shadow-sm"
+                style={{
+                  backgroundColor: "transparent",
+                  border: `1px solid var(--main_blue)`,
+                  color: "var(--white)",
+                }}
               />
             </div>
 
             {/* Campo de contraseña */}
             <div>
-              <label className="block mb-2 text-black font-semibold">CONTRASEÑA</label>
+              <label
+                className="block mb-2 font-semibold"
+                style={{ color: "var(--white)" }}
+              >
+                CONTRASEÑA
+              </label>
               <input
                 type="password"
                 placeholder="********"
-                className="w-full bg-transparent border border-gray-400 rounded p-2 focus:outline-none text-black shadow-sm"
+                className="w-full rounded p-2 focus:outline-none shadow-sm"
+                style={{
+                  backgroundColor: "transparent",
+                  border: `1px solid var(--main_blue)`,
+                  color: "var(--white)",
+                }}
               />
             </div>
 
-            {/* Botón de inicio */}
-            <div className="text-left">
+            {/* Botones */}
+            <div className="flex flex-col gap-3">
+              {/* Botón de inicio de sesión */}
               <Link href="/agendar-citas">
-                <button className="text-white shadow border border-gray-600 px-6 py-2 bg-[#147DA8] hover:bg-[#60D6A7] transition delay-50 rounded">
+                <button
+                  className="w-full text-white shadow px-6 py-2 transition delay-50 rounded font-semibold"
+                  style={{
+                    backgroundColor: "var(--main_blue)",
+                    border: `1px solid var(--white)`,
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = "#60D6A7";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = "var(--main_blue)";
+                  }}
+                >
                   INICIAR SESIÓN
                 </button>
               </Link>
-            </div>
 
+              {/* Botón de crear cuenta */}
+              <button
+                onClick={handleCreateAccount}
+                className="w-full text-white shadow px-6 py-2 transition delay-50 rounded font-semibold"
+                style={{
+                  backgroundColor: "transparent",
+                  border: `2px solid var(--main_blue)`,
+                  color: "var(--main_blue)",
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = "#60D6A7";
+                  e.currentTarget.style.color = "var(--white)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = "transparent";
+                  e.currentTarget.style.color = "var(--main_blue)";
+                }}
+              >
+                CREAR CUENTA
+              </button>
+            </div>
           </div>
         </div>
       </div>
+
+      <Link href="/">
+        <button
+          className="fixed bottom-6 right-6 px-5 py-3 rounded-full transition-all duration-300 transform hover:scale-110 flex items-center gap-2 group z-50"
+          style={{
+            backgroundColor: "var(--main_blue)",
+            color: "var(--white)",
+            boxShadow:
+              "0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.2)",
+            border: `1px solid var(--white)`,
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = "#60D6A7";
+            e.currentTarget.style.boxShadow =
+              "0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.3)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = "var(--main_blue)";
+            e.currentTarget.style.boxShadow =
+              "0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.2)";
+          }}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-5 w-5 group-hover:-translate-x-1 transition-transform duration-300"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M10 19l-7-7m0 0l7-7m-7 7h18"
+            />
+          </svg>
+          <span className="font-semibold">Volver al inicio</span>
+        </button>
+      </Link>
     </div>
   );
 }

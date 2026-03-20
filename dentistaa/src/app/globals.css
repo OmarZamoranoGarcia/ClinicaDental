@@ -7,3 +7,7 @@
   --main_gray: #171A1FFF;
   --light_gray: #1E2128FF;
 }
+
+main{
+  background-color: var(--main_black);
+}

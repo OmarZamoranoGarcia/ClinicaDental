@@ -21,7 +21,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="es">
       <body className={`${geistSans.variable} ${geistMono.variable} h-screen`}>
-        <main className="w-full h-full bg-gray-100 overflow-auto">
+        <main className="w-full h-fulloverflow-auto">
           {children}
         </main>
       </body>
