@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Poppins } from "next/font/google";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 // Fuente Poppins: limpia, moderna y profesional
 const poppins = Poppins({
@@ -15,7 +16,57 @@ export default function Login() {
   const router = useRouter();
 
   const handleCreateAccount = () => {
-    router.push("/registro"); // Cambia esta ruta según tu necesidad
+    router.push("/crear-cuenta"); // Cambia esta ruta según tu necesidad
+  };
+
+  const [formData, setFormData] = useState({
+    usuario: "",
+    password: "",
+  });
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+
+    try {
+      const response = await fetch("/api/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Error al iniciar sesión");
+      }
+
+      // Guardar usuario en localStorage
+      localStorage.setItem("usuario", JSON.stringify(data.usuario));
+
+      // Redirigir según rol: rolId 4 -> agendar-citas, otros -> servicios
+      if (data.usuario.rolId === 4 || String(data.usuario.rol).toLowerCase() === "cliente") {
+        router.push("/agendar-citas");
+      } else {
+        router.push("/servicios");
+      }
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
   };
 
   return (
@@ -58,6 +109,20 @@ export default function Login() {
               </label>
             </div>
 
+            {/* Mostrar error si existe */}
+            {error && (
+              <div
+                className="text-center p-2 rounded"
+                style={{
+                  backgroundColor: "#ff4444",
+                  color: "white",
+                  fontSize: "14px",
+                }}
+              >
+                {error}
+              </div>
+            )}
+
             {/* Campo de usuario */}
             <div>
               <label
@@ -68,6 +133,9 @@ export default function Login() {
               </label>
               <input
                 type="text"
+                name="usuario"
+                value={formData.usuario}
+                onChange={handleChange}
                 placeholder="Ej. Alvaro Casas"
                 className="w-full rounded p-2 focus:outline-none shadow-sm"
                 style={{
@@ -75,6 +143,8 @@ export default function Login() {
                   border: `1px solid var(--main_blue)`,
                   color: "var(--white)",
                 }}
+                disabled={loading}
+                required
               />
             </div>
 
@@ -88,6 +158,9 @@ export default function Login() {
               </label>
               <input
                 type="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
                 placeholder="********"
                 className="w-full rounded p-2 focus:outline-none shadow-sm"
                 style={{
@@ -95,46 +168,57 @@ export default function Login() {
                   border: `1px solid var(--main_blue)`,
                   color: "var(--white)",
                 }}
+                disabled={loading}
+                required
               />
             </div>
 
             {/* Botones */}
             <div className="flex flex-col gap-3">
-              {/* Botón de inicio de sesión */}
-              <Link href="/agendar-citas">
-                <button
-                  className="w-full text-white shadow px-6 py-2 transition delay-50 rounded font-semibold"
-                  style={{
-                    backgroundColor: "var(--main_blue)",
-                    border: `1px solid var(--white)`,
-                  }}
-                  onMouseEnter={(e) => {
+              {/* Botón de inicio de sesión - AHORA CON handleSubmit */}
+              <button
+                onClick={handleSubmit}
+                disabled={loading}
+                className="w-full text-white shadow px-6 py-2 transition delay-50 rounded font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{
+                  backgroundColor: "var(--main_blue)",
+                  border: `1px solid var(--white)`,
+                }}
+                onMouseEnter={(e) => {
+                  if (!loading) {
                     e.currentTarget.style.backgroundColor = "#60D6A7";
-                  }}
-                  onMouseLeave={(e) => {
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!loading) {
                     e.currentTarget.style.backgroundColor = "var(--main_blue)";
-                  }}
-                >
-                  INICIAR SESIÓN
-                </button>
-              </Link>
+                  }
+                }}
+              >
+                {loading ? "INICIANDO..." : "INICIAR SESIÓN"}
+              </button>
 
               {/* Botón de crear cuenta */}
               <button
                 onClick={handleCreateAccount}
-                className="w-full text-white shadow px-6 py-2 transition delay-50 rounded font-semibold"
+                disabled={loading}
+                className="w-full text-white shadow px-6 py-2 transition delay-50 rounded font-semibold disabled:opacity-50"
                 style={{
                   backgroundColor: "transparent",
                   border: `2px solid var(--main_blue)`,
                   color: "var(--main_blue)",
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = "#60D6A7";
-                  e.currentTarget.style.color = "var(--white)";
+                  if (!loading) {
+                    e.currentTarget.style.backgroundColor = "#60D6A7";
+                    e.currentTarget.style.color = "var(--white)";
+                  }
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = "transparent";
-                  e.currentTarget.style.color = "var(--main_blue)";
+                  if (!loading) {
+                    e.currentTarget.style.backgroundColor = "transparent";
+                    e.currentTarget.style.color = "var(--main_blue)";
+                  }
                 }}
               >
                 CREAR CUENTA

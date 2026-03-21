@@ -2,8 +2,23 @@
 
 import Sidebar from "@/components/barralateral/sidebar";
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { getCurrentUser, isRole4 } from "@/lib/auth";
 
 export default function Servicios() {
+  const router = useRouter();
+
+  useEffect(() => {
+    const usuario = getCurrentUser();
+    if (!usuario) {
+      router.push("/entrada");
+      return;
+    }
+    if (isRole4(usuario)) {
+      router.push("/agendar-citas");
+    }
+  }, [router]);
+
   // Estado para los servicios y para el nuevo servicio
   const [servicios, setServicios] = useState([]);
   const [nuevoServicio, setNuevoServicio] = useState({ tipo: "", costo: "" });
