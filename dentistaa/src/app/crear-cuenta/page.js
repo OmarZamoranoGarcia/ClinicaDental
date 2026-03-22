@@ -236,6 +236,7 @@ export default function Registro() {
                 backgroundColor: "transparent",
                 border: `1px solid var(--main_blue)`,
                 color: "var(--white)",
+                colorScheme: "dark",
               }}
               disabled={loading}
               required

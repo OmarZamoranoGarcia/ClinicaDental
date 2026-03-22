@@ -23,13 +23,42 @@ export function clearCurrentUser() {
   localStorage.removeItem(USER_STORAGE_KEY);
 }
 
+function getRolId(user) {
+  if (!user) return null;
+  const candidate = user.rolId ?? user.rolID ?? user.rol;
+  const rolId = Number(candidate);
+  return Number.isNaN(rolId) ? null : rolId;
+}
+
+function getRolName(user) {
+  if (!user) return "";
+  return String(user.rol || user.role || "").toLowerCase();
+}
+
+export function isRole1(user) {
+  const rolId = getRolId(user);
+  if (rolId !== null) return rolId === 1;
+  return getRolName(user) === "admin";
+}
+
+export function isRole2(user) {
+  const rolId = getRolId(user);
+  if (rolId !== null) return rolId === 2;
+  return getRolName(user) === "doctor";
+}
+
+export function isRole3(user) {
+  const rolId = getRolId(user);
+  if (rolId !== null) return rolId === 3;
+  return getRolName(user) === "recepcionista";
+}
+
 export function isRole4(user) {
-  if (!user) return false;
-  // rolId puede haber sido guardado como número o string
-  const rolId = Number(user.rolId ?? user.rolID ?? user.rol); // backup in case
-  if (!Number.isNaN(rolId)) {
-    return rolId === 4;
-  }
-  // si no hay id, comparar por nombre de rol
-  return String(user.rol || user.role || "").toLowerCase() === "cliente";
+  const rolId = getRolId(user);
+  if (rolId !== null) return rolId === 4;
+  return ["cliente", "paciente"].includes(getRolName(user));
+}
+
+export function isRoleAdminOrRecepcionista(user) {
+  return isRole1(user) || isRole3(user);
 }

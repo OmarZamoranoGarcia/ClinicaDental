@@ -3,16 +3,41 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Sidebar from "@/components/barralateral/sidebar";
-import { getCurrentUser } from "@/lib/auth";
+import { getCurrentUser, isRole1, isRole2, isRole3, isRole4 } from "@/lib/auth";
 
 export default function Menu() {
   const router = useRouter();
+  const [usuarioActual, setUsuarioActual] = useState(null);
+  const [isPaciente, setIsPaciente] = useState(false);
 
   useEffect(() => {
     const usuario = getCurrentUser();
     if (!usuario) {
       router.push("/entrada");
+      return;
     }
+
+    setUsuarioActual(usuario);
+    setIsPaciente(isRole4(usuario));
+
+    // Si es paciente, acceso permitido
+    if (isRole4(usuario)) {
+      return;
+    }
+
+    // Si es doctor (rol 2), redirigir a citas agendadas
+    if (isRole2(usuario)) {
+      router.push("/citas-agendadas");
+      return;
+    }
+
+    // Admin y recepcionista pueden acceder
+    if (isRole1(usuario) || isRole3(usuario)) {
+      return;
+    }
+
+    // Por defecto, redirigir
+    router.push("/servicios");
   }, [router]);
 
   // Estados para los datos del formulario
@@ -23,11 +48,11 @@ export default function Menu() {
   const [horaCita, setHoraCita] = useState("");
   const [estado, setEstado] = useState("Pendiente");
   const [notas, setNotas] = useState("");
-  
+
   // Estados para los selects
   const [pacientes, setPacientes] = useState([]);
   const [servicios, setServicios] = useState([]);
-  const [usuarios, setUsuarios] = useState([]);
+  const [dentistas, setDentistas] = useState([]);
   const [loading, setLoading] = useState(false);
   const [cargandoDatos, setCargandoDatos] = useState(true);
 
@@ -36,44 +61,40 @@ export default function Menu() {
     const obtenerDatosSelects = async () => {
       setCargandoDatos(true);
       try {
-        // Obtener pacientes
-        const pacientesRes = await fetch("/api/pacientes");
-        const pacientesData = await pacientesRes.json();
-        console.log("Pacientes recibidos:", pacientesData);
-        setPacientes(Array.isArray(pacientesData) ? pacientesData : []);
-
         // Obtener servicios
         const serviciosRes = await fetch("/api/servicios");
         const serviciosData = await serviciosRes.json();
-        console.log("Servicios recibidos:", serviciosData);
         setServicios(Array.isArray(serviciosData) ? serviciosData : []);
 
-        // Obtener usuarios (dentistas)
-        const usuariosRes = await fetch("/api/usuarios");
-        const usuariosData = await usuariosRes.json();
-        console.log("Usuarios recibidos:", usuariosData);
-        setUsuarios(Array.isArray(usuariosData) ? usuariosData : []);
+        // Obtener dentistas (solo rol 2 - doctor)
+        const dentistasRes = await fetch("/api/usuarios?rol=2");
+        const dentistasData = await dentistasRes.json();
+        setDentistas(Array.isArray(dentistasData) ? dentistasData : []);
 
+        // Solo cargar pacientes si NO es paciente
+        if (!isPaciente) {
+          const pacientesRes = await fetch("/api/pacientes");
+          const pacientesData = await pacientesRes.json();
+          setPacientes(Array.isArray(pacientesData) ? pacientesData : []);
+        }
       } catch (error) {
         console.error("Error al obtener datos:", error);
         alert("Error al cargar los datos necesarios");
-        setPacientes([]);
         setServicios([]);
-        setUsuarios([]);
+        setDentistas([]);
+        setPacientes([]);
       } finally {
         setCargandoDatos(false);
       }
     };
 
-    obtenerDatosSelects();
-  }, []);
+    if (usuarioActual !== null) {
+      obtenerDatosSelects();
+    }
+  }, [isPaciente, usuarioActual]);
 
   const enviarDatos = async () => {
     // Validaciones
-    if (!pacienteID) {
-      alert("Por favor selecciona un paciente");
-      return;
-    }
     if (!servicioID) {
       alert("Por favor selecciona un servicio");
       return;
@@ -94,18 +115,39 @@ export default function Menu() {
     setLoading(true);
 
     try {
+      const body = {
+        servicioID: parseInt(servicioID),
+        usuarioID: parseInt(usuarioID),
+        fechaCita,
+        horaCita,
+        estado,
+        notas,
+      };
+
+      // Determinar el pacienteID según el rol
+      if (!isPaciente) {
+        // Admin/Recepcionista: usar el seleccionado
+        if (!pacienteID) {
+          alert("Por favor selecciona un paciente");
+          setLoading(false);
+          return;
+        }
+        body.pacienteID = parseInt(pacienteID);
+      } else {
+        // Paciente: usar su propio ID de la sesión
+        if (usuarioActual && usuarioActual.id) {
+          body.pacienteID = usuarioActual.id;
+        } else {
+          alert("Error: No se pudo identificar al paciente");
+          setLoading(false);
+          return;
+        }
+      }
+
       const res = await fetch("/api/citas", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          pacienteID,
-          servicioID,
-          usuarioID,
-          fechaCita,
-          horaCita,
-          estado,
-          notas,
-        }),
+        body: JSON.stringify(body),
       });
 
       const data = await res.json();
@@ -120,6 +162,13 @@ export default function Menu() {
         setHoraCita("");
         setEstado("Pendiente");
         setNotas("");
+
+        // Redirigir a rutas dependiendo del rol
+        if (isPaciente) {
+          router.push("/");
+        } else {
+          router.push("/citas-agendadas");
+        }
       } else {
         alert("Error: " + data.error);
       }
@@ -132,7 +181,7 @@ export default function Menu() {
   };
 
   // Mostrar loading mientras se cargan los datos
-  if (cargandoDatos) {
+  if (cargandoDatos || usuarioActual === null) {
     return (
       <div
         className="flex h-screen items-center justify-center"
@@ -161,35 +210,58 @@ export default function Menu() {
         </h1>
 
         <div className="max-w-3xl space-y-6" style={{ color: "var(--white)" }}>
-          {/* Select Paciente */}
-          <div>
-            <label className="block mb-2" style={{ color: "var(--white)" }}>
-              PACIENTE *
-            </label>
-            <select
-              className="w-full rounded p-2"
-              style={{
-                backgroundColor: "var(--light_gray)",
-                border: `1px solid var(--main_blue)`,
-                color: "var(--white)",
-                boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.3)",
-              }}
-              value={pacienteID}
-              onChange={(e) => setPacienteID(e.target.value)}
-              disabled={loading}
-            >
-              <option value="">Seleccionar paciente</option>
-              {pacientes.length > 0 ? (
-                pacientes.map((paciente) => (
-                  <option key={paciente.PacienteID} value={paciente.PacienteID}>
-                    {paciente.NombreCompleto}
-                  </option>
-                ))
-              ) : (
-                <option disabled>No hay pacientes registrados</option>
-              )}
-            </select>
-          </div>
+          {/* Campo de paciente - condicional según rol */}
+          {!isPaciente ? (
+            <div>
+              <label className="block mb-2" style={{ color: "var(--white)" }}>
+                PACIENTE *
+              </label>
+              <select
+                className="w-full rounded p-2"
+                style={{
+                  backgroundColor: "var(--light_gray)",
+                  border: `1px solid var(--main_blue)`,
+                  color: "var(--white)",
+                  boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.3)",
+                }}
+                value={pacienteID}
+                onChange={(e) => setPacienteID(e.target.value)}
+                disabled={loading}
+              >
+                <option value="">Seleccionar paciente</option>
+                {pacientes.length > 0 ? (
+                  pacientes.map((paciente) => (
+                    <option
+                      key={paciente.PacienteID}
+                      value={paciente.PacienteID}
+                    >
+                      {paciente.NombreCompleto}
+                    </option>
+                  ))
+                ) : (
+                  <option disabled>No hay pacientes registrados</option>
+                )}
+              </select>
+            </div>
+          ) : (
+            <div>
+              <label className="block mb-2" style={{ color: "var(--white)" }}>
+                PACIENTE
+              </label>
+              <input
+                type="text"
+                value={usuarioActual?.nombre || "Cargando..."}
+                disabled
+                className="w-full rounded p-2 opacity-70 cursor-not-allowed"
+                style={{
+                  backgroundColor: "var(--light_gray)",
+                  border: `1px solid var(--main_blue)`,
+                  color: "var(--white)",
+                  boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.3)",
+                }}
+              />
+            </div>
+          )}
 
           {/* Select Servicio */}
           <div>
@@ -212,7 +284,8 @@ export default function Menu() {
               {servicios.length > 0 ? (
                 servicios.map((servicio) => (
                   <option key={servicio.ServicioID} value={servicio.ServicioID}>
-                    {servicio.NombreServicio} {servicio.Precio ? `- $${servicio.Precio}` : ''}
+                    {servicio.NombreServicio}{" "}
+                    {servicio.Precio ? `- $${servicio.Precio}` : ""}
                   </option>
                 ))
               ) : (
@@ -221,7 +294,7 @@ export default function Menu() {
             </select>
           </div>
 
-          {/* Select Usuario (Dentista) */}
+          {/* Select Dentista - solo muestra doctores (rol 2) */}
           <div>
             <label className="block mb-2" style={{ color: "var(--white)" }}>
               DENTISTA *
@@ -239,10 +312,10 @@ export default function Menu() {
               disabled={loading}
             >
               <option value="">Seleccionar dentista</option>
-              {usuarios.length > 0 ? (
-                usuarios.map((usuario) => (
-                  <option key={usuario.UsuarioID} value={usuario.UsuarioID}>
-                    {usuario.NombreCompleto} {usuario.NombreRol ? `- ${usuario.NombreRol}` : ''}
+              {dentistas.length > 0 ? (
+                dentistas.map((dentista) => (
+                  <option key={dentista.UsuarioID} value={dentista.UsuarioID}>
+                    {dentista.NombreCompleto}
                   </option>
                 ))
               ) : (
@@ -264,11 +337,12 @@ export default function Menu() {
                 border: `1px solid var(--main_blue)`,
                 color: "var(--white)",
                 boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.3)",
+                colorScheme: "dark",
               }}
               value={fechaCita}
               onChange={(e) => setFechaCita(e.target.value)}
               disabled={loading}
-              min={new Date().toISOString().split('T')[0]}
+              min={new Date().toISOString().split("T")[0]}
             />
           </div>
 
@@ -285,6 +359,7 @@ export default function Menu() {
                 border: `1px solid var(--main_blue)`,
                 color: "var(--white)",
                 boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.3)",
+                colorScheme: "dark",
               }}
               value={horaCita}
               onChange={(e) => setHoraCita(e.target.value)}

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Sidebar from "@/components/barralateral/sidebar";
-import { getCurrentUser, isRole4 } from "@/lib/auth";
+import { getCurrentUser, isRole1, isRole2, isRole3, isRole4 } from "@/lib/auth";
 
 export default function CitasAgendadas() {
   const router = useRouter();
@@ -14,9 +14,17 @@ export default function CitasAgendadas() {
       router.push("/entrada");
       return;
     }
+
     if (isRole4(usuario)) {
       router.push("/agendar-citas");
+      return;
     }
+
+    if (isRole2(usuario) || isRole1(usuario) || isRole3(usuario)) {
+      return; // Acceso permitido
+    }
+
+    router.push("/servicios");
   }, [router]);
 
   const [citas, setCitas] = useState([]);
@@ -245,7 +253,7 @@ export default function CitasAgendadas() {
                       {new Date(cita.FechaCita).toLocaleDateString('es-MX')}
                     </td>
                     <td className="p-3" style={{ color: "var(--white)" }}>
-                      {cita.HoraCita.substring(0, 5)}
+                      {cita.HoraCita || '--:--'}
                     </td>
                     <td className="p-3">
                       <span

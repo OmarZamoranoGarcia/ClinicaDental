@@ -1,9 +1,10 @@
 // app/api/citas/[id]/route.js
-import { getConnection } from '../../db/db';
+import { getConnection } from '../../../db/db';
 
 export async function DELETE(request, { params }) {
     try {
-        const { id } = params;
+        const resolvedParams = await params;
+        const { id } = resolvedParams;
         const pool = await getConnection();
         
         await pool.request()
@@ -19,7 +20,8 @@ export async function DELETE(request, { params }) {
 
 export async function PATCH(request, { params }) {
     try {
-        const { id } = params;
+        const resolvedParams = await params;
+        const { id } = resolvedParams;
         const { pacienteID, servicioID, usuarioID, fechaCita, horaCita, estado, notas } = await request.json();
         
         const pool = await getConnection();

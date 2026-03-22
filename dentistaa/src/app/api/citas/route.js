@@ -11,7 +11,7 @@ export async function GET() {
                 ServicioID,
                 UsuarioID,
                 FechaCita,
-                HoraCita,
+                CONVERT(VARCHAR(5), HoraCita, 108) as HoraCita,
                 Estado,
                 Notas,
                 FechaCreacion
@@ -30,55 +30,94 @@ export async function POST(request) {
     try {
         const { pacienteID, servicioID, usuarioID, fechaCita, horaCita, estado, notas } = await request.json();
         
-        // Validaciones
-        if (!pacienteID || !servicioID || !usuarioID || !fechaCita || !horaCita) {
+        // Validaciones básicas
+        if (!servicioID || !usuarioID || !fechaCita || !horaCita) {
             return Response.json(
-                { error: 'Todos los campos marcados con * son requeridos' },
+                { error: 'Servicio, dentista, fecha y hora son requeridos' },
                 { status: 400 }
             );
         }
         
         const pool = await getConnection();
         
-        // Verificar que el paciente existe
-        const pacienteCheck = await pool.request()
-            .input('pacienteID', pacienteID)
-            .query('SELECT PacienteID FROM PACIENTES WHERE PacienteID = @pacienteID');
+        // 1. Verificar que el dentista existe y tiene rol 2 (doctor)
+        const doctorCheck = await pool.request()
+            .input('usuarioID', usuarioID)
+            .query(`
+                SELECT u.UsuarioID, r.NombreRol 
+                FROM USUARIOS u
+                INNER JOIN ROLES r ON u.RolID = r.RolID
+                WHERE u.UsuarioID = @usuarioID AND u.Activo = 1 AND r.RolID = 2
+            `);
         
-        if (pacienteCheck.recordset.length === 0) {
+        if (doctorCheck.recordset.length === 0) {
             return Response.json(
-                { error: 'El paciente seleccionado no existe' },
+                { error: 'El dentista seleccionado no es válido o no está activo' },
                 { status: 400 }
             );
         }
         
-        // Verificar que el servicio existe
+        // 2. Verificar que el servicio existe
         const servicioCheck = await pool.request()
             .input('servicioID', servicioID)
-            .query('SELECT ServicioID FROM SERVICIOS WHERE ServicioID = @servicioID');
+            .query('SELECT ServicioID FROM SERVICIOS WHERE ServicioID = @servicioID AND Activo = 1');
         
         if (servicioCheck.recordset.length === 0) {
             return Response.json(
-                { error: 'El servicio seleccionado no existe' },
+                { error: 'El servicio seleccionado no existe o no está disponible' },
                 { status: 400 }
             );
         }
         
-        // Verificar que el usuario (dentista) existe
-        const usuarioCheck = await pool.request()
-            .input('usuarioID', usuarioID)
-            .query('SELECT UsuarioID FROM USUARIOS WHERE UsuarioID = @usuarioID AND Activo = 1');
+        // 3. Determinar el pacienteID según quién hace la petición
+        // IMPORTANTE: Aquí debes obtener el usuario de la sesión/token
+        // Por ahora, asumimos que si no viene pacienteID, es un paciente agendando
+        let finalPacienteID = pacienteID;
         
-        if (usuarioCheck.recordset.length === 0) {
+        if (!finalPacienteID) {
+            // Si no viene pacienteID, debe ser un paciente agendando
+            // Aquí deberías obtener el PacienteID de la sesión del usuario logueado
+            // Por ahora, devolvemos error, pero en producción lo tomarías del token
             return Response.json(
-                { error: 'El dentista seleccionado no existe o está inactivo' },
+                { error: 'No se pudo identificar al paciente. Por favor inicia sesión nuevamente.' },
+                { status: 401 }
+            );
+        }
+        
+        // Verificar que el paciente existe
+        const pacienteCheck = await pool.request()
+            .input('pacienteID', finalPacienteID)
+            .query('SELECT PacienteID FROM PACIENTES WHERE PacienteID = @pacienteID AND Activo = 1');
+        
+        if (pacienteCheck.recordset.length === 0) {
+            return Response.json(
+                { error: 'El paciente seleccionado no existe o está inactivo' },
                 { status: 400 }
             );
         }
         
-        // Insertar nueva cita
-        const result = await pool.request()
-            .input('pacienteID', pacienteID)
+        // 4. Verificar que no exista una cita en el mismo día y hora para el mismo dentista
+        const citaExistente = await pool.request()
+            .input('usuarioID', usuarioID)
+            .input('fechaCita', fechaCita)
+            .input('horaCita', horaCita)
+            .query(`
+                SELECT CitaID FROM CITAS 
+                WHERE UsuarioID = @usuarioID 
+                AND FechaCita = @fechaCita 
+                AND HoraCita = @horaCita
+            `);
+        
+        if (citaExistente.recordset.length > 0) {
+            return Response.json(
+                { error: 'El dentista ya tiene una cita agendada en ese horario' },
+                { status: 400 }
+            );
+        }
+        
+        // 5. Insertar nueva cita
+        await pool.request()
+            .input('pacienteID', finalPacienteID)
             .input('servicioID', servicioID)
             .input('usuarioID', usuarioID)
             .input('fechaCita', fechaCita)

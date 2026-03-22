@@ -49,11 +49,30 @@ export default function Login() {
       // Guardar usuario en localStorage
       localStorage.setItem("usuario", JSON.stringify(data.usuario));
 
-      // Redirigir según rol: rolId 4 -> agendar-citas, otros -> servicios
-      if (data.usuario.rolId === 4 || String(data.usuario.rol).toLowerCase() === "cliente") {
+      // Redirigir según rol:
+      // rolId 4/paciente -> /agendar-citas
+      // rolId 2/doctor -> /citas-agendadas
+      // rolId 1/admin y rolId 3/recepcionista -> /servicios
+      const rolId = Number(
+        data.usuario.rolId ?? data.usuario.rolID ?? data.usuario.rol,
+      );
+      const rolName = String(
+        data.usuario.rol || data.usuario.role || "",
+      ).toLowerCase();
+
+      if (rolId === 4 || rolName === "cliente" || rolName === "paciente") {
         router.push("/agendar-citas");
-      } else {
+      } else if (rolId === 2 || rolName === "doctor") {
+        router.push("/citas-agendadas");
+      } else if (
+        rolId === 1 ||
+        rolName === "admin" ||
+        rolId === 3 ||
+        rolName === "recepcionista"
+      ) {
         router.push("/servicios");
+      } else {
+        router.push("/entrada");
       }
     } catch (err) {
       setError(err.message);
@@ -85,7 +104,9 @@ export default function Login() {
             src="/logindiente.png"
             alt="Imagen lateral"
             fill
+            sizes="(max-width: 768px) 100vw, 50vw"
             className="object-cover"
+            loading="eager"
           />
         </div>
 
