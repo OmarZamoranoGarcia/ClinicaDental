@@ -57,10 +57,10 @@ export async function POST(request) {
             );
         }
         
-        // 2. Verificar que el servicio existe
+        // 2. Verificar que el servicio existe y obtener la duración
         const servicioCheck = await pool.request()
             .input('servicioID', servicioID)
-            .query('SELECT ServicioID FROM SERVICIOS WHERE ServicioID = @servicioID AND Activo = 1');
+            .query('SELECT ServicioID, DuracionMinutos FROM SERVICIOS WHERE ServicioID = @servicioID AND Activo = 1');
         
         if (servicioCheck.recordset.length === 0) {
             return Response.json(
@@ -68,7 +68,34 @@ export async function POST(request) {
                 { status: 400 }
             );
         }
-        
+
+        const duracionMinutos = servicioCheck.recordset[0].DuracionMinutos;
+        const getTimeString = (time) => {
+            if (typeof time === 'string') {
+                return time.slice(0, 5);
+            }
+            if (time instanceof Date) {
+                return time.toISOString().slice(11, 16);
+            }
+            return '';
+        };
+
+        const timeToMinutes = (time) => {
+            const normalized = getTimeString(time);
+            const [hours, minutes] = normalized.split(":").map(Number);
+            return hours * 60 + minutes;
+        };
+
+        const inicioCita = timeToMinutes(horaCita);
+        const finCita = inicioCita + duracionMinutos;
+
+        if (inicioCita < 8 * 60 || finCita > 17 * 60) {
+            return Response.json(
+                { error: 'El horario debe ser entre las 08:00 y las 17:00 según la duración del servicio' },
+                { status: 400 }
+            );
+        }
+
         // 3. Determinar el pacienteID según quién hace la petición
         // IMPORTANTE: Aquí debes obtener el usuario de la sesión/token
         // Por ahora, asumimos que si no viene pacienteID, es un paciente agendando
@@ -95,26 +122,32 @@ export async function POST(request) {
                 { status: 400 }
             );
         }
-        
-        // 4. Verificar que no exista una cita en el mismo día y hora para el mismo dentista
-        const citaExistente = await pool.request()
+
+        // 4. Verificar solapamiento de citas para el mismo dentista en el mismo día
+        const citasExistentes = await pool.request()
             .input('usuarioID', usuarioID)
             .input('fechaCita', fechaCita)
-            .input('horaCita', horaCita)
             .query(`
-                SELECT CitaID FROM CITAS 
-                WHERE UsuarioID = @usuarioID 
-                AND FechaCita = @fechaCita 
-                AND HoraCita = @horaCita
+                SELECT c.CitaID, CONVERT(VARCHAR(5), c.HoraCita, 108) as HoraCita, s.DuracionMinutos
+                FROM CITAS c
+                INNER JOIN SERVICIOS s ON c.ServicioID = s.ServicioID
+                WHERE c.UsuarioID = @usuarioID
+                  AND c.FechaCita = @fechaCita
             `);
-        
-        if (citaExistente.recordset.length > 0) {
+
+        const overlap = citasExistentes.recordset.some((cita) => {
+            const inicioExistente = timeToMinutes(cita.HoraCita);
+            const finExistente = inicioExistente + cita.DuracionMinutos;
+            return inicioCita < finExistente && inicioExistente < finCita;
+        });
+
+        if (overlap) {
             return Response.json(
-                { error: 'El dentista ya tiene una cita agendada en ese horario' },
+                { error: 'El dentista ya tiene una cita que se solapa con el horario seleccionado' },
                 { status: 400 }
             );
         }
-        
+
         // 5. Insertar nueva cita
         await pool.request()
             .input('pacienteID', finalPacienteID)

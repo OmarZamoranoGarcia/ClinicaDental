@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Sidebar from "@/components/barralateral/sidebar";
+import Calendario from "@/components/calendario/calendario";
 import { getCurrentUser, isRole1, isRole2, isRole3, isRole4 } from "@/lib/auth";
 
 export default function Menu() {
@@ -49,12 +50,47 @@ export default function Menu() {
   const [estado, setEstado] = useState("Pendiente");
   const [notas, setNotas] = useState("");
 
+  const [selectedSlot, setSelectedSlot] = useState("");
+
   // Estados para los selects
   const [pacientes, setPacientes] = useState([]);
   const [servicios, setServicios] = useState([]);
   const [dentistas, setDentistas] = useState([]);
   const [loading, setLoading] = useState(false);
   const [cargandoDatos, setCargandoDatos] = useState(true);
+
+  const servicioSeleccionado = servicios.find(
+    (servicio) => servicio.ServicioID === parseInt(servicioID, 10)
+  );
+  const horaMaxima = servicioSeleccionado
+    ? getMaxHora(servicioSeleccionado.DuracionMinutos)
+    : "17:00";
+
+  const timeToMinutes = (time) => {
+    if (!time) return 0;
+    const [hours, minutes] = time.split(":").map(Number);
+    return hours * 60 + minutes;
+  };
+
+  const isHorarioValido = (time, duracion) => {
+    if (!time || !duracion) return false;
+    const inicio = timeToMinutes(time);
+    const fin = inicio + duracion;
+    return inicio >= 8 * 60 && fin <= 17 * 60;
+  };
+
+  function getMaxHora(duracion) {
+    if (!duracion) return "17:00";
+    const fin = 17 * 60 - duracion;
+    const hours = Math.floor(fin / 60);
+    const minutes = fin % 60;
+    return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+  }
+
+  const handleSlotSelect = (hora) => {
+    setHoraCita(hora);
+    setSelectedSlot(hora);
+  };
 
   // Obtener datos para los selects al cargar el componente
   useEffect(() => {
@@ -111,6 +147,16 @@ export default function Menu() {
       alert("Por favor selecciona una hora");
       return;
     }
+    if (!servicioSeleccionado) {
+      alert("Por favor selecciona un servicio válido");
+      return;
+    }
+    if (!isHorarioValido(horaCita, servicioSeleccionado.DuracionMinutos)) {
+      alert(
+        `La hora seleccionada no es válida para el servicio elegido. El horario debe ser entre 08:00 y ${horaMaxima}`
+      );
+      return;
+    }
 
     setLoading(true);
 
@@ -162,6 +208,7 @@ export default function Menu() {
         setHoraCita("");
         setEstado("Pendiente");
         setNotas("");
+        setSelectedSlot("");
 
         // Redirigir a rutas dependiendo del rol
         if (isPaciente) {
@@ -362,11 +409,30 @@ export default function Menu() {
                 colorScheme: "dark",
               }}
               value={horaCita}
-              onChange={(e) => setHoraCita(e.target.value)}
+              onChange={(e) => {
+                setHoraCita(e.target.value);
+                setSelectedSlot(e.target.value);
+              }}
               disabled={loading}
-              step="1800"
+              step="900"
+              min="08:00"
+              max={horaMaxima}
             />
+            <p className="mt-2 text-sm text-white/70">
+              Los horarios son válidos de 08:00 hasta 17:00, ajustados a la duración del servicio.
+              {servicioSeleccionado ? (
+                <span> Este servicio dura {servicioSeleccionado.DuracionMinutos} minutos.</span>
+              ) : null}
+            </p>
           </div>
+
+          <Calendario
+            fecha={fechaCita}
+            dentistaID={usuarioID}
+            servicioDuracion={servicioSeleccionado?.DuracionMinutos}
+            onSelectHora={handleSlotSelect}
+            horaSeleccionada={selectedSlot}
+          />
 
           {/* Notas */}
           <div>
