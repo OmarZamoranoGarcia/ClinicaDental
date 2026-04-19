@@ -108,6 +108,28 @@ export default function Sidebar() {
           </Link>
         )}
 
+        {(esRol1 || esRol2) && (
+          <Link
+            href="/crear-expedientes"
+            className="italic w-full py-2 shadow-xl mb-4 rounded text-center block transition delay-20"
+            style={{
+              backgroundColor: "var(--light_gray)",
+              color: "var(--white)",
+              border: `1px solid var(--main_blue)`,
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = "var(--main_blue)";
+              e.currentTarget.style.color = "var(--white)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = "var(--light_gray)";
+              e.currentTarget.style.color = "var(--white)";
+            }}
+          >
+            CREAR EXPEDIENTE
+          </Link>
+        )}
+
         {(esRol1 || esRol2 || esRol3) && (
           <Link
             href="/expedientes"
