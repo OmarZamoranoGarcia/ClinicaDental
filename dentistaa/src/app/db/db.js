@@ -1,18 +1,18 @@
 import sql from 'mssql';
 
 const config = {
-    user: "sa",  
-    password: "Zago0413", 
-    server: "localhost",
-    database: "ClinicaDental",    
-    port: 1433,        
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    server: process.env.DB_SERVER,
+    database: process.env.DB_NAME,
+    port: Number(process.env.DB_PORT),
     options: {
-        encrypt: true,   
-        trustServerCertificate: true,
-        enableArithAbort: true,
+        encrypt: process.env.DB_ENCRYPT === "true",
+        trustServerCertificate: process.env.DB_TRUST_CERT === "true",
+        enableArithAbort: process.env.DB_ENABLE_ARITH_ABORT === "true",
     },
-    connectionTimeout: 30000,
-    requestTimeout: 30000
+    connectionTimeout: Number(process.env.DB_CONN_TIMEOUT),
+    requestTimeout: Number(process.env.DB_REQ_TIMEOUT),
 };
 
 let pool = null;
