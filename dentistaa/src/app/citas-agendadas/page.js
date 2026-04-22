@@ -162,9 +162,9 @@ export default function CitasAgendadas() {
     >
       <Sidebar />
 
-      <main className="flex-1 py-10 px-6 lg:px-20 relative overflow-y-auto">
+      <main className="flex-1 py-6 px-3 sm:py-10 sm:px-6 lg:px-20 relative overflow-y-auto">
         <h1
-          className="text-3xl font-bold mb-6"
+          className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6"
           style={{ color: "var(--white)" }}
         >
           CITAS AGENDADAS
@@ -177,7 +177,7 @@ export default function CitasAgendadas() {
             backgroundColor: "var(--main_gray)",
           }}
         >
-          <table className="min-w-full text-left">
+          <table className="min-w-full text-left text-sm md:text-base">
             <thead
               style={{
                 backgroundColor: "var(--main_blue)",
@@ -185,28 +185,28 @@ export default function CitasAgendadas() {
               }}
             >
               <tr>
-                <th className="p-3 border-b" style={{ borderColor: "var(--main_gray)" }}>
+                <th className="px-2 py-2 sm:px-3 sm:py-3 border-b text-xs sm:text-sm" style={{ borderColor: "var(--main_gray)" }}>
                   Paciente
                 </th>
-                <th className="p-3 border-b" style={{ borderColor: "var(--main_gray)" }}>
+                <th className="px-2 py-2 sm:px-3 sm:py-3 border-b text-xs sm:text-sm" style={{ borderColor: "var(--main_gray)" }}>
                   Servicio
                 </th>
-                <th className="p-3 border-b" style={{ borderColor: "var(--main_gray)" }}>
+                <th className="px-2 py-2 sm:px-3 sm:py-3 border-b text-xs sm:text-sm" style={{ borderColor: "var(--main_gray)" }}>
                   Dentista
                 </th>
-                <th className="p-3 border-b" style={{ borderColor: "var(--main_gray)" }}>
+                <th className="px-2 py-2 sm:px-3 sm:py-3 border-b text-xs sm:text-sm" style={{ borderColor: "var(--main_gray)" }}>
                   Fecha
                 </th>
-                <th className="p-3 border-b" style={{ borderColor: "var(--main_gray)" }}>
+                <th className="px-2 py-2 sm:px-3 sm:py-3 border-b text-xs sm:text-sm" style={{ borderColor: "var(--main_gray)" }}>
                   Hora
                 </th>
-                <th className="p-3 border-b" style={{ borderColor: "var(--main_gray)" }}>
+                <th className="px-2 py-2 sm:px-3 sm:py-3 border-b text-xs sm:text-sm" style={{ borderColor: "var(--main_gray)" }}>
                   Estado
                 </th>
-                <th className="p-3 border-b" style={{ borderColor: "var(--main_gray)" }}>
+                <th className="px-2 py-2 sm:px-3 sm:py-3 border-b text-xs sm:text-sm hidden sm:table-cell" style={{ borderColor: "var(--main_gray)" }}>
                   Notas
                 </th>
-                <th className="p-3 border-b text-center" style={{ borderColor: "var(--main_gray)" }}>
+                <th className="px-2 py-2 sm:px-3 sm:py-3 border-b text-center text-xs sm:text-sm" style={{ borderColor: "var(--main_gray)" }}>
                   Acciones
                 </th>
               </tr>
@@ -227,7 +227,7 @@ export default function CitasAgendadas() {
                 citas.map((cita) => (
                   <tr
                     key={cita.CitaID}
-                    className="border-b transition-colors"
+                    className="border-b transition-colors text-xs sm:text-sm"
                     style={{
                       borderColor: "var(--main_gray)",
                       backgroundColor: "var(--light_gray)",
@@ -240,24 +240,24 @@ export default function CitasAgendadas() {
                         "var(--light_gray)";
                     }}
                   >
-                    <td className="p-3" style={{ color: "var(--white)" }}>
+                    <td className="px-2 py-2 sm:px-3 sm:py-3" style={{ color: "var(--white)" }}>
                       {getNombrePaciente(cita.PacienteID)}
                     </td>
-                    <td className="p-3" style={{ color: "var(--white)" }}>
+                    <td className="px-2 py-2 sm:px-3 sm:py-3" style={{ color: "var(--white)" }}>
                       {getNombreServicio(cita.ServicioID)}
                     </td>
-                    <td className="p-3" style={{ color: "var(--white)" }}>
+                    <td className="px-2 py-2 sm:px-3 sm:py-3" style={{ color: "var(--white)" }}>
                       {getNombreUsuario(cita.UsuarioID)}
                     </td>
-                    <td className="p-3" style={{ color: "var(--white)" }}>
+                    <td className="px-2 py-2 sm:px-3 sm:py-3" style={{ color: "var(--white)" }}>
                       {new Date(cita.FechaCita).toLocaleDateString('es-MX')}
                     </td>
-                    <td className="p-3" style={{ color: "var(--white)" }}>
+                    <td className="px-2 py-2 sm:px-3 sm:py-3" style={{ color: "var(--white)" }}>
                       {cita.HoraCita || '--:--'}
                     </td>
-                    <td className="p-3">
+                    <td className="px-2 py-2 sm:px-3 sm:py-3">
                       <span
-                        className="px-2 py-1 rounded-full text-xs font-semibold"
+                        className="px-2 py-1 rounded-full text-xs font-semibold inline-block"
                         style={{
                           backgroundColor: 
                             cita.Estado === 'Pendiente' ? '#F59E0B' :
@@ -270,27 +270,27 @@ export default function CitasAgendadas() {
                         {cita.Estado}
                       </span>
                     </td>
-                    <td className="p-3" style={{ color: "var(--white)", maxWidth: "200px", overflow: "hidden", textOverflow: "ellipsis" }}>
+                    <td className="px-2 py-2 sm:px-3 sm:py-3 hidden sm:table-cell text-center" style={{ color: "var(--white)", maxWidth: "150px", overflow: "hidden", textOverflow: "ellipsis" }}>
                       {cita.Notas || "-"}
                     </td>
-                    <td className="p-3 text-center space-x-3">
+                    <td className="px-2 py-2 sm:px-3 sm:py-3 text-center space-y-1 sm:space-y-2 flex flex-col justify-center">
                       <button
-                        className="px-4 py-2 rounded text-white transition-all duration-300 transform hover:scale-105"
+                        className="px-2 sm:px-3 py-1 rounded text-white text-xs sm:text-sm transition-all duration-300 transform hover:scale-105"
                         style={{
                           backgroundColor: "var(--main_blue)",
                           border: `1px solid var(--white)`,
-                          boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.3)",
+                          boxShadow: "0 2px 4px -1px rgba(0, 0, 0, 0.3)",
                         }}
                         onMouseEnter={(e) => {
                           e.currentTarget.style.backgroundColor = "#60D6A7";
                           e.currentTarget.style.boxShadow =
-                            "0 10px 15px -3px rgba(0, 0, 0, 0.4)";
+                            "0 6px 12px -3px rgba(0, 0, 0, 0.4)";
                         }}
                         onMouseLeave={(e) => {
                           e.currentTarget.style.backgroundColor =
                             "var(--main_blue)";
                           e.currentTarget.style.boxShadow =
-                            "0 4px 6px -1px rgba(0, 0, 0, 0.3)";
+                            "0 2px 4px -1px rgba(0, 0, 0, 0.3)";
                         }}
                         onClick={() => abrirEditar(cita)}
                       >
@@ -298,21 +298,21 @@ export default function CitasAgendadas() {
                       </button>
 
                       <button
-                        className="px-4 py-2 rounded text-white transition-all duration-300 transform hover:scale-105"
+                        className="px-2 sm:px-3 py-1 rounded text-white text-xs sm:text-sm transition-all duration-300 transform hover:scale-105"
                         style={{
                           backgroundColor: "#DC2626",
                           border: `1px solid var(--white)`,
-                          boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.3)",
+                          boxShadow: "0 2px 4px -1px rgba(0, 0, 0, 0.3)",
                         }}
                         onMouseEnter={(e) => {
                           e.currentTarget.style.backgroundColor = "#EF4444";
                           e.currentTarget.style.boxShadow =
-                            "0 10px 15px -3px rgba(0, 0, 0, 0.4)";
+                            "0 6px 12px -3px rgba(0, 0, 0, 0.4)";
                         }}
                         onMouseLeave={(e) => {
                           e.currentTarget.style.backgroundColor = "#DC2626";
                           e.currentTarget.style.boxShadow =
-                            "0 4px 6px -1px rgba(0, 0, 0, 0.3)";
+                            "0 2px 4px -1px rgba(0, 0, 0, 0.3)";
                         }}
                         onClick={() => eliminarCita(cita.CitaID)}
                       >
@@ -328,9 +328,9 @@ export default function CitasAgendadas() {
 
         {/* MODAL EDITAR */}
         {editando && (
-          <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50">
+          <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
             <div
-              className="p-6 rounded-xl shadow-2xl w-[500px] max-h-[90vh] overflow-y-auto transition-all duration-300"
+              className="p-4 sm:p-6 rounded-xl shadow-2xl w-full sm:w-[500px] max-h-[90vh] overflow-y-auto transition-all duration-300"
               style={{
                 backgroundColor: "var(--main_gray)",
                 color: "var(--white)",

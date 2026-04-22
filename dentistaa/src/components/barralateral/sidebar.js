@@ -32,7 +32,7 @@ export default function Sidebar() {
 
   return (
     <aside
-      className="w-80 h-full flex flex-col justify-between p-4 border-r"
+      className="w-56 sm:w-64 md:w-56 lg:w-64 h-full flex flex-col justify-between p-2 sm:p-3 md:p-2 lg:p-4 border-r overflow-y-auto"
       style={{
         backgroundColor: "var(--main_gray)",
         borderColor: "var(--light_gray)",
@@ -43,7 +43,7 @@ export default function Sidebar() {
         {(esRol1 || esRol3 || esRol4) && (
           <Link
             href="/agendar-citas"
-            className="italic w-full py-2 shadow-xl mb-4 rounded text-center block transition delay-20"
+            className="italic w-full py-1 sm:py-2 px-1 sm:px-2 shadow-xl mb-2 sm:mb-4 rounded text-center block transition delay-20 text-xs sm:text-sm md:text-xs lg:text-sm"
             style={{
               backgroundColor: "var(--light_gray)",
               color: "var(--white)",
@@ -65,7 +65,7 @@ export default function Sidebar() {
         {(esRol1 || esRol3 || esRol2) && (
           <Link
             href="/citas-agendadas"
-            className="italic w-full py-2 shadow-xl mb-4 rounded text-center block transition delay-20"
+            className="italic w-full py-1 sm:py-2 px-1 sm:px-2 shadow-xl mb-2 sm:mb-4 rounded text-center block transition delay-20 text-xs sm:text-sm md:text-xs lg:text-sm"
             style={{
               backgroundColor: "var(--light_gray)",
               color: "var(--white)",
@@ -87,7 +87,7 @@ export default function Sidebar() {
         {(esRol1 || esRol3) && (
           <Link
             href="/servicios"
-            className="italic w-full py-2 shadow-xl mb-4 rounded text-center block transition delay-20"
+            className="italic w-full py-1 sm:py-2 px-1 sm:px-2 shadow-xl mb-2 sm:mb-4 rounded text-center block transition delay-20 text-xs sm:text-sm md:text-xs lg:text-sm"
             style={{
               backgroundColor: "var(--light_gray)",
               color: "var(--white)",
@@ -110,7 +110,7 @@ export default function Sidebar() {
       {/* Botón de CERRAR SESIÓN */}
       <Link
         href="/entrada"
-        className="italic w-full py-2 shadow-xl rounded text-center block transition delay-20"
+        className="italic w-full py-1 sm:py-2 px-1 sm:px-2 shadow-xl rounded text-center block transition delay-20 text-xs sm:text-sm md:text-xs lg:text-sm"
         style={{
           backgroundColor: "var(--light_gray)",
           color: "var(--white)",

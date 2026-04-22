@@ -1,12 +1,15 @@
 // app/api/servicios/route.js
 import { getConnection } from '../../db/db';
 
-// GET - Obtener todos los servicios
-export async function GET() {
+// GET - Obtener servicios (solo activos por defecto, o todos si se especifica)
+export async function GET(request) {
     try {
+        const { searchParams } = new URL(request.url);
+        const todos = searchParams.get('todos') === 'true';
+        
         const pool = await getConnection();
-        const result = await pool.request().query(`
-            SELECT 
+        const query = todos
+            ? `SELECT 
                 ServicioID,
                 NombreServicio,
                 Descripcion,
@@ -14,8 +17,19 @@ export async function GET() {
                 Precio,
                 Activo
             FROM SERVICIOS
-            ORDER BY NombreServicio
-        `);
+            ORDER BY NombreServicio`
+            : `SELECT 
+                ServicioID,
+                NombreServicio,
+                Descripcion,
+                DuracionMinutos,
+                Precio,
+                Activo
+            FROM SERVICIOS
+            WHERE Activo = 1
+            ORDER BY NombreServicio`;
+        
+        const result = await pool.request().query(query);
         
         return Response.json(result.recordset);
     } catch (error) {

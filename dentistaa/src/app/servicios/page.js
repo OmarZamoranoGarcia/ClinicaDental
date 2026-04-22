@@ -44,7 +44,7 @@ export default function Servicios() {
   const cargarServicios = async () => {
     setLoading(true);
     try {
-      const response = await fetch("/api/servicios");
+      const response = await fetch("/api/servicios?todos=true");
       const data = await response.json();
 
       if (Array.isArray(data)) {
