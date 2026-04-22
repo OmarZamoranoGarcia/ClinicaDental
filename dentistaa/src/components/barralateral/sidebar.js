@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
   getCurrentUser,
@@ -12,6 +13,7 @@ import {
 } from "@/lib/auth";
 
 export default function Sidebar() {
+  const router = useRouter();
   const [esRol1, setEsRol1] = useState(false);
   const [esRol2, setEsRol2] = useState(false);
   const [esRol3, setEsRol3] = useState(false);
@@ -27,7 +29,7 @@ export default function Sidebar() {
 
   const handleLogout = () => {
     clearCurrentUser();
-    window.location.href = "/entrada";
+    router.replace("/entrada");
   };
 
   return (
@@ -105,12 +107,56 @@ export default function Sidebar() {
             SERVICIOS
           </Link>
         )}
+
+        {(esRol1 || esRol2) && (
+          <Link
+            href="/crear-expedientes"
+            className="italic w-full py-2 shadow-xl mb-4 rounded text-center block transition delay-20"
+            style={{
+              backgroundColor: "var(--light_gray)",
+              color: "var(--white)",
+              border: `1px solid var(--main_blue)`,
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = "var(--main_blue)";
+              e.currentTarget.style.color = "var(--white)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = "var(--light_gray)";
+              e.currentTarget.style.color = "var(--white)";
+            }}
+          >
+            CREAR EXPEDIENTE
+          </Link>
+        )}
+
+        {(esRol1 || esRol2 || esRol3) && (
+          <Link
+            href="/expedientes"
+            className="italic w-full py-2 shadow-xl mb-4 rounded text-center block transition delay-20"
+            style={{
+              backgroundColor: "var(--light_gray)",
+              color: "var(--white)",
+              border: `1px solid var(--main_blue)`,
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = "var(--main_blue)";
+              e.currentTarget.style.color = "var(--white)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = "var(--light_gray)";
+              e.currentTarget.style.color = "var(--white)";
+            }}
+          >
+            EXPEDIENTES
+          </Link>
+        )}
       </div>
 
       {/* Botón de CERRAR SESIÓN */}
       <Link
         href="/entrada"
-        className="italic w-full py-1 sm:py-2 px-1 sm:px-2 shadow-xl rounded text-center block transition delay-20 text-xs sm:text-sm md:text-xs lg:text-sm"
+        className="italic w-full py-2 shadow-xl rounded text-center block transition delay-20"
         style={{
           backgroundColor: "var(--light_gray)",
           color: "var(--white)",
@@ -126,7 +172,7 @@ export default function Sidebar() {
         }}
       >
         CERRAR SESIÓN
-      </Link>
+      </button>
     </aside>
   );
 }
