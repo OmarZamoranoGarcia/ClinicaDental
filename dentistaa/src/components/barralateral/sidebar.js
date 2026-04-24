@@ -64,6 +64,29 @@ export default function Sidebar() {
           </Link>
         )}
 
+        {/* ENLACE PARA MIS CITAS: Solo para pacientes */}
+        {esRol4 && (
+          <Link
+            href="/mis-citas"
+            className="italic w-full py-1 sm:py-2 px-1 sm:px-2 shadow-xl mb-2 sm:mb-4 rounded text-center block transition delay-20 text-xs sm:text-sm md:text-xs lg:text-sm"
+            style={{
+              backgroundColor: "var(--light_gray)",
+              color: "var(--white)",
+              border: `1px solid var(--main_blue)`,
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = "var(--main_blue)";
+              e.currentTarget.style.color = "var(--white)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = "var(--light_gray)";
+              e.currentTarget.style.color = "var(--white)";
+            }}
+          >
+            MIS CITAS
+          </Link>
+        )}
+
         {(esRol1 || esRol3 || esRol2) && (
           <Link
             href="/citas-agendadas"
@@ -172,7 +195,7 @@ export default function Sidebar() {
         }}
       >
         CERRAR SESIÓN
-      </button>
+      </Link>
     </aside>
   );
 }

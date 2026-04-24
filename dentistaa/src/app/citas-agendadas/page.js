@@ -250,7 +250,7 @@ export default function CitasAgendadas() {
                       {getNombreUsuario(cita.UsuarioID)}
                     </td>
                     <td className="px-2 py-2 sm:px-3 sm:py-3" style={{ color: "var(--white)" }}>
-                      {new Date(cita.FechaCita).toLocaleDateString('es-MX')}
+                      {new Date(cita.FechaCita).toLocaleDateString('es-ES', { timeZone: 'UTC' })}
                     </td>
                     <td className="px-2 py-2 sm:px-3 sm:py-3" style={{ color: "var(--white)" }}>
                       {cita.HoraCita || '--:--'}
@@ -429,6 +429,7 @@ export default function CitasAgendadas() {
                     border: `1px solid var(--main_blue)`,
                     color: "var(--white)",
                     backgroundColor: "var(--light_gray)",
+                    colorScheme: "dark",
                   }}
                   value={form.fechaCita}
                   onChange={(e) => setForm({ ...form, fechaCita: e.target.value })}
@@ -447,6 +448,7 @@ export default function CitasAgendadas() {
                     border: `1px solid var(--main_blue)`,
                     color: "var(--white)",
                     backgroundColor: "var(--light_gray)",
+                    colorScheme: "dark",
                   }}
                   value={form.horaCita}
                   onChange={(e) => setForm({ ...form, horaCita: e.target.value })}
@@ -469,7 +471,6 @@ export default function CitasAgendadas() {
                   onChange={(e) => setForm({ ...form, estado: e.target.value })}
                 >
                   <option value="Pendiente">Pendiente</option>
-                  <option value="Confirmada">Confirmada</option>
                   <option value="Cancelada">Cancelada</option>
                   <option value="Completada">Completada</option>
                 </select>

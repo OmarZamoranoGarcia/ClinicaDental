@@ -1,23 +1,45 @@
 // app/api/citas/route.js
 import { getConnection } from './../../db/db';
 
-export async function GET() {
+export async function GET(request) {
     try {
+        const { searchParams } = new URL(request.url);
+        const pacienteID = searchParams.get('pacienteID');
+        
         const pool = await getConnection();
-        const result = await pool.request().query(`
+        
+        let query = `
             SELECT 
-                CitaID,
-                PacienteID,
-                ServicioID,
-                UsuarioID,
-                FechaCita,
-                CONVERT(VARCHAR(5), HoraCita, 108) as HoraCita,
-                Estado,
-                Notas,
-                FechaCreacion
-            FROM CITAS
-            ORDER BY FechaCita DESC, HoraCita DESC
-        `);
+                c.CitaID,
+                c.PacienteID,
+                p.NombreCompleto as NombrePaciente,
+                c.ServicioID,
+                s.NombreServicio,
+                s.Precio,
+                s.DuracionMinutos,
+                c.UsuarioID,
+                u.NombreCompleto as NombreDentista,
+                c.FechaCita,
+                CONVERT(VARCHAR(5), c.HoraCita, 108) as HoraCita,
+                c.Estado,
+                c.Notas,
+                c.FechaCreacion
+            FROM CITAS c
+            INNER JOIN PACIENTES p ON c.PacienteID = p.PacienteID
+            INNER JOIN SERVICIOS s ON c.ServicioID = s.ServicioID
+            INNER JOIN USUARIOS u ON c.UsuarioID = u.UsuarioID
+        `;
+        
+        const requestInput = pool.request();
+        
+        if (pacienteID) {
+            query += ' WHERE c.PacienteID = @pacienteID';
+            requestInput.input('pacienteID', pacienteID);
+        }
+        
+        query += ' ORDER BY c.FechaCita ASC';
+        
+        const result = await requestInput.query(query);
         
         return Response.json(result.recordset);
     } catch (error) {

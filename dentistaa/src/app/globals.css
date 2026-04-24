@@ -11,3 +11,15 @@
 main{
   background-color: var(--main_black);
 }
+
+select {
+  background-color: var(--light_gray);
+  color: var(--white);
+  border: 1px solid var(--main_blue);
+}
+
+select option {
+  background-color: white;
+  color: black;
+}
+

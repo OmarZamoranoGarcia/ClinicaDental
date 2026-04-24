@@ -32,7 +32,7 @@ export async function POST(request) {
                     'usuario' as tipo
                 FROM USUARIOS u
                 INNER JOIN ROLES r ON u.RolID = r.RolID
-                WHERE u.NombreUsuario = @usuario AND u.ContrasenaHash = @password
+                WHERE (u.NombreUsuario = @usuario OR u.Email = @usuario) AND u.ContrasenaHash = @password
             `);
         
         let usuarioData = result.recordset[0];
@@ -54,7 +54,7 @@ export async function POST(request) {
                         'paciente' as rol,
                         'paciente' as tipo
                     FROM PACIENTES
-                    WHERE NombreUsuario = @usuario AND ContrasenaHash = @password
+                    WHERE (NombreUsuario = @usuario OR Email = @usuario) AND ContrasenaHash = @password
                 `);
             
             usuarioData = result.recordset[0];

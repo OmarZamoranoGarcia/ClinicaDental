@@ -226,8 +226,8 @@ LEFT JOIN USUARIOS u ON c.UsuarioID = u.UsuarioID
 ORDER BY c.FechaCita DESC;
 GO
 
--- porximo prompt
-perfecto, ahora quiero que en el panel de expedientes, tenga la opcion de editarlos. Ademas que pongas una opcion para ver las citas que ha tenido un paciente en base a su expediente con el sig join: SELECT
+-- consulta para ver las citas de cada paciente en base a su nombre completo y su id de expediente
+SELECT
 e.ExpedienteID,
 p.NombreCompleto,
 c.CitaID,

@@ -61,7 +61,7 @@ export default function Login() {
       ).toLowerCase();
 
       if (rolId === 4 || rolName === "cliente" || rolName === "paciente") {
-        router.push("/agendar-citas");
+        router.push("/mis-citas");
       } else if (rolId === 2 || rolName === "doctor") {
         router.push("/citas-agendadas");
       } else if (
@@ -150,14 +150,14 @@ export default function Login() {
                 className="block mb-2 font-semibold"
                 style={{ color: "var(--white)" }}
               >
-                USUARIO
+                USUARIO O CORREO
               </label>
               <input
                 type="text"
                 name="usuario"
                 value={formData.usuario}
                 onChange={handleChange}
-                placeholder="Ej. Alvaro Casas"
+                placeholder="Nombre de usuario o correo electrónico"
                 className="w-full rounded p-2 focus:outline-none shadow-sm"
                 style={{
                   backgroundColor: "transparent",

@@ -212,7 +212,7 @@ export default function Menu() {
 
         // Redirigir a rutas dependiendo del rol
         if (isPaciente) {
-          router.push("/");
+          router.push("/mis-citas");
         } else {
           router.push("/citas-agendadas");
         }
@@ -269,7 +269,6 @@ export default function Menu() {
                   backgroundColor: "var(--light_gray)",
                   border: `1px solid var(--main_blue)`,
                   color: "var(--white)",
-                  boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.3)",
                 }}
                 value={pacienteID}
                 onChange={(e) => setPacienteID(e.target.value)}
