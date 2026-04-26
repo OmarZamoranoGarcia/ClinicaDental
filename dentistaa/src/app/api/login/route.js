@@ -25,6 +25,7 @@ export async function POST(request) {
                     u.UsuarioID as id,
                     u.NombreCompleto as nombre,
                     u.NombreUsuario as usuario,
+                    u.Email as email,
                     u.ContrasenaHash,
                     u.Activo,
                     u.RolID as rolId,
@@ -48,6 +49,7 @@ export async function POST(request) {
                         PacienteID as id,
                         NombreCompleto as nombre,
                         NombreUsuario as usuario,
+                        Email as email,
                         ContrasenaHash,
                         Activo,
                         4 as rolId,
@@ -83,6 +85,7 @@ export async function POST(request) {
                 id: usuarioData.id,
                 nombre: usuarioData.nombre,
                 usuario: usuarioData.usuario,
+                email: usuarioData.email,
                 rol: usuarioData.rol,
                 rolId: usuarioData.rolId,
                 tipo: usuarioData.tipo  // 'usuario' o 'paciente'

@@ -200,6 +200,40 @@ export default function Menu() {
 
       if (res.ok) {
         alert("Cita registrada correctamente");
+
+        // Obtener datos del paciente para enviar correo
+        try {
+          let pacienteIDEnvio = "";
+          let rolPaciente = "paciente";
+
+          if (isPaciente) {
+            pacienteIDEnvio = usuarioActual.id;
+            rolPaciente = "paciente";
+          } else {
+            pacienteIDEnvio = parseInt(pacienteID);
+            rolPaciente = "paciente";
+          }
+
+          // Enviar correo usando el nuevo endpoint
+          if (pacienteIDEnvio) {
+            await fetch("/api/correo/enviar", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                usuarioID: pacienteIDEnvio,
+                rol: rolPaciente,
+                asunto: "Cita Agendada",
+                cuerpo: `Tu cita ha sido agendada exitosamente para el ${fechaCita} a las ${horaCita}`
+              }),
+            }).catch((error) => {
+              console.error("Error al enviar correo:", error);
+              // No interrumpir el flujo si falla el correo
+            });
+          }
+        } catch (error) {
+          console.error("Error al procesar envío de correo:", error);
+        }
+
         // Limpiar formulario
         setPacienteID("");
         setServicioID("");
