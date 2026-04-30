@@ -15,6 +15,10 @@ export default function Registro() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   
+  const [step, setStep] = useState(1); // 1: Formulario, 2: Código
+  const [codigoGenerado, setCodigoGenerado] = useState("");
+  const [codigoIngresado, setCodigoIngresado] = useState("");
+  
   const [formData, setFormData] = useState({
     nombreCompleto: "",
     email: "",
@@ -60,6 +64,56 @@ export default function Registro() {
       return;
     }
 
+    // Si es el paso 1, enviamos el código de verificación por correo
+    if (step === 1) {
+      try {
+        const code = Math.floor(100000 + Math.random() * 900000).toString();
+        setCodigoGenerado(code);
+
+        const response = await fetch("/api/correo/enviar", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            emailDirecto: formData.email,
+            nombreDirecto: formData.nombreCompleto,
+            asunto: "Código de Verificación - Registro Clínica Dental",
+            cuerpo: `
+              <div style="font-family: sans-serif; color: #2c3e50;">
+                <h1>Verifica tu cuenta 🎉</h1>
+                <p>Hola <strong>${formData.nombreCompleto}</strong>,</p>
+                <p>Para completar tu registro, utiliza el siguiente código de seguridad:</p>
+                <div style="background: #f1f5f9; padding: 20px; text-align: center; font-size: 32px; font-weight: bold; letter-spacing: 5px; color: #3b82f6; border-radius: 10px;">
+                  ${code}
+                </div>
+                <p>Este código es necesario para confirmar que tienes acceso a este correo.</p>
+              </div>
+            `
+          }),
+        });
+
+        if (!response.ok) throw new Error("Error al enviar el correo de verificación");
+
+        setStep(2);
+        setSuccess("Código enviado. Por favor revisa tu bandeja de entrada.");
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
+
+    // Si es el paso 2, validamos el código antes de registrar en la DB
+    if (codigoIngresado !== codigoGenerado) {
+      setError("El código de verificación es incorrecto");
+      setLoading(false);
+      return;
+    }
+
+    await registrarUsuario();
+  };
+
+  const registrarUsuario = async () => {
     try {
       const response = await fetch("/api/registro-paciente", {
         method: "POST",
@@ -144,7 +198,9 @@ export default function Registro() {
             </div>
           )}
 
-          {/* Nombre Completo */}
+          {step === 1 ? (
+            <>
+              {/* Nombre Completo */}
           <div>
             <label 
               className="block mb-2 font-semibold"
@@ -342,6 +398,41 @@ export default function Registro() {
               required
             />
           </div>
+            </>
+          ) : (
+            <div className="animate-in fade-in duration-500">
+              <div className="text-center space-y-4 py-4">
+                <label className="block text-xl font-bold" style={{ color: "var(--white)" }}>
+                  INGRESA EL CÓDIGO DE 6 DÍGITOS
+                </label>
+                <input
+                  type="text"
+                  maxLength="6"
+                  placeholder="000000"
+                  value={codigoIngresado}
+                  onChange={(e) => setCodigoIngresado(e.target.value)}
+                  className="w-full text-center text-3xl tracking-[10px] font-mono rounded-lg p-4 focus:outline-none"
+                  style={{
+                    backgroundColor: "rgba(255,255,255,0.1)",
+                    border: `2px solid var(--main_blue)`,
+                    color: "var(--white)",
+                  }}
+                  disabled={loading}
+                />
+                <p className="text-sm" style={{ color: "var(--white)", opacity: 0.8 }}>
+                  El código fue enviado a <strong>{formData.email}</strong>
+                </p>
+                <button 
+                  type="button"
+                  onClick={() => { setStep(1); setError(""); }}
+                  className="text-sm underline"
+                  style={{ color: "var(--main_blue)" }}
+                >
+                  ¿Correo incorrecto? Volver atrás
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* Botones */}
           <div className="flex gap-3 pt-4">
@@ -365,7 +456,7 @@ export default function Registro() {
                 }
               }}
             >
-              {loading ? "CREANDO CUENTA..." : "REGISTRARSE"}
+              {loading ? "PROCESANDO..." : (step === 1 ? "ENVIAR CÓDIGO" : "VERIFICAR Y REGISTRAR")}
             </button>
 
             <button

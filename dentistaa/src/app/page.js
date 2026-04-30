@@ -1,9 +1,43 @@
 "use client"; // Importante: esto es un Client Component
 
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 export default function Home() {
   const router = useRouter();
+  const [servicios, setServicios] = useState([]);
+
+  // Cargar servicios desde la base de datos
+  useEffect(() => {
+    const fetchServicios = async () => {
+      try {
+        const response = await fetch("/api/servicios");
+        const data = await response.json();
+        if (Array.isArray(data)) {
+          setServicios(data);
+        }
+      } catch (error) {
+        console.error("Error al cargar los servicios:", error);
+      }
+    };
+
+    fetchServicios();
+  }, []);
+
+  // Función para asignar un icono según el nombre del servicio
+  const getIcon = (nombre) => {
+    const n = nombre.toLowerCase();
+    if (n.includes("blanquea")) return "✨";
+    if (n.includes("ortodoncia")) return "🦷";
+    if (n.includes("cirugía") || n.includes("cirugia")) return "⚕️";
+    if (n.includes("limpieza")) return "💎";
+    if (n.includes("carie")) return "🔧";
+    if (n.includes("extracción") || n.includes("extraccion")) return "🦷";
+    if (n.includes("consulta")) return "📋";
+    if (n.includes("endodoncia")) return "🔬";
+    return "🦷"; // Icono por defecto
+  };
+
   return (
     <>
       {/* NAV */}
@@ -110,26 +144,23 @@ export default function Home() {
             </div>
 
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-8">
-              {[
-                { name: "Blanqueamiento dental", icon: "✨" },
-                { name: "Ortodoncia", icon: "🦷" },
-                { name: "Cirugía maxilofacial", icon: "⚕️" },
-                { name: "Limpieza", icon: "💎" },
-                { name: "Caries", icon: "🔧" },
-                { name: "Extracciones", icon: "🦷" },
-              ].map((service, index) => (
+              {servicios.map((service, index) => (
                 <div
-                  key={index}
+                  key={service.ServicioID || index}
                   className="group p-8 bg-[var(--main_gray)]/50 backdrop-blur-sm rounded-2xl border border-[var(--light_gray)] hover:border-[var(--main_blue)]/50 transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:shadow-[var(--main_blue)]/10"
                 >
-                  <span className="text-4xl mb-4 block">{service.icon}</span>
+                  <span className="text-4xl mb-4 block">{getIcon(service.NombreServicio)}</span>
                   <h3 className="text-xl font-semibold text-[var(--main_blue)] mb-3">
-                    {service.name}
+                    {service.NombreServicio}
                   </h3>
                   <p className="text-[var(--white)]/60 text-sm leading-relaxed">
-                    Atención profesional con tecnología avanzada para resultados
-                    óptimos.
+                    {service.Descripcion || "Atención profesional con tecnología avanzada para resultados óptimos."}
                   </p>
+                  {service.Precio && (
+                    <p className="mt-4 text-[var(--main_blue)] font-bold">
+                      Desde ${service.Precio}
+                    </p>
+                  )}
                 </div>
               ))}
             </div>

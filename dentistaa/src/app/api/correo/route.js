@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 
 export async function POST(request) {
   try {
-    const { correoPaciente, nombrePaciente } = await request.json();
+    const { correoPaciente, nombrePaciente, asunto, cuerpo } = await request.json();
 
     console.log(`📧 Intentando enviar correo a: ${correoPaciente}, Nombre: ${nombrePaciente}`);
 
@@ -25,8 +25,8 @@ export async function POST(request) {
     const info = await transporter.sendMail({
       from: `"Clínica Dental" <${process.env.EMAIL_USER}>`,
       to: correoPaciente,
-      subject: `Confirmación de cita - Clínica Dental`,
-      html: `
+      subject: asunto || `Confirmación de cita - Clínica Dental`,
+      html: cuerpo || `
         <!DOCTYPE html>
         <html>
           <body style="font-family: Arial, sans-serif;">

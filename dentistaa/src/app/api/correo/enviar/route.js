@@ -2,12 +2,12 @@ import { getConnection } from '../../../db/db';
 
 export async function POST(request) {
   try {
-    const { usuarioID, rol, asunto, cuerpo } = await request.json();
+    const { usuarioID, rol, emailDirecto, nombreDirecto, asunto, cuerpo } = await request.json();
 
     // Validar campos requeridos
-    if (!usuarioID || !rol) {
+    if (!usuarioID && !emailDirecto) {
       return Response.json(
-        { success: false, error: 'usuarioID y rol son requeridos' },
+        { success: false, error: 'usuarioID o emailDirecto es requerido' },
         { status: 400 }
       );
     }
@@ -16,6 +16,10 @@ export async function POST(request) {
     let email = '';
     let nombre = '';
 
+    if (emailDirecto) {
+      email = emailDirecto;
+      nombre = nombreDirecto || 'Usuario';
+    } else if (usuarioID && rol) {
     // Buscar email según el rol
     if (rol === 'paciente' || rol === 4) {
       // Buscar en tabla PACIENTES
@@ -39,6 +43,7 @@ export async function POST(request) {
         email = result.recordset[0].Email;
         nombre = result.recordset[0].NombreCompleto;
       }
+    }
     }
 
     if (!email) {
