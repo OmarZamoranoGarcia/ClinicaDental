@@ -111,13 +111,6 @@ export async function POST(request) {
         const inicioCita = timeToMinutes(horaCita);
         const finCita = inicioCita + duracionMinutos;
 
-        if (inicioCita < 8 * 60 || finCita > 17 * 60) {
-            return Response.json(
-                { error: 'El horario debe ser entre las 08:00 y las 17:00 según la duración del servicio' },
-                { status: 400 }
-            );
-        }
-
         // 3. Determinar el pacienteID según quién hace la petición
         // IMPORTANTE: Aquí debes obtener el usuario de la sesión/token
         // Por ahora, asumimos que si no viene pacienteID, es un paciente agendando

@@ -59,12 +59,63 @@ export default function Menu() {
   const [loading, setLoading] = useState(false);
   const [cargandoDatos, setCargandoDatos] = useState(true);
 
+  // Estado para los horarios dinámicos
+  const [horariosConfig, setHorariosConfig] = useState({
+    "Lunes": "8:00 AM - 6:00 PM",
+    "Martes": "8:00 AM - 6:00 PM",
+    "Miércoles": "8:00 AM - 6:00 PM",
+    "Jueves": "8:00 AM - 6:00 PM",
+    "Viernes": "8:00 AM - 6:00 PM",
+    "Sábado": "8:00 AM - 3:00 PM",
+    "Domingo": "Cerrado"
+  });
+
+  // Cargar horarios desde localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem("clinica_horarios");
+    if (saved) setHorariosConfig(JSON.parse(saved));
+  }, []);
+
+  // Helpers para manejar el rango de horas dinámico
+  const getDiaSemana = (fechaStr) => {
+    if (!fechaStr) return "";
+    const fecha = new Date(fechaStr + "T00:00:00");
+    const dias = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
+    return dias[fecha.getDay()];
+  };
+
+  const parseHorarioStr = (horarioStr) => {
+    if (!horarioStr || horarioStr === "Cerrado") return null;
+    const [inicioStr, finStr] = horarioStr.split(" - ");
+    const parseTime = (s) => {
+      const parts = s.match(/(\d+):(\d+)\s*(AM|PM)/i);
+      if (!parts) return 0;
+      let hours = parseInt(parts[1]);
+      const mins = parseInt(parts[2]);
+      const ampm = parts[3].toUpperCase();
+      if (ampm === "PM" && hours < 12) hours += 12;
+      if (ampm === "AM" && hours === 12) hours = 0;
+      return hours * 60 + mins;
+    };
+    return { inicio: parseTime(inicioStr), fin: parseTime(finStr) };
+  };
+
+  const rangoHoy = parseHorarioStr(horariosConfig[getDiaSemana(fechaCita)]);
+
   const servicioSeleccionado = servicios.find(
     (servicio) => servicio.ServicioID === parseInt(servicioID, 10)
   );
-  const horaMaxima = servicioSeleccionado
-    ? getMaxHora(servicioSeleccionado.DuracionMinutos)
-    : "17:00";
+
+  const formatMinutes = (totalMinutes) => {
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+  };
+
+  const horaMinima = rangoHoy ? formatMinutes(rangoHoy.inicio) : "08:00";
+  const horaMaxima = rangoHoy && servicioSeleccionado
+    ? formatMinutes(rangoHoy.fin - servicioSeleccionado.DuracionMinutos)
+    : (rangoHoy ? formatMinutes(rangoHoy.fin) : "18:00");
 
   const timeToMinutes = (time) => {
     if (!time) return 0;
@@ -72,25 +123,27 @@ export default function Menu() {
     return hours * 60 + minutes;
   };
 
-  const isHorarioValido = (time, duracion) => {
+  const isHorarioValido = (time, duracion, fecha) => {
     if (!time || !duracion) return false;
+    if (!rangoHoy) return false; // Cerrado
+
     const inicio = timeToMinutes(time);
     const fin = inicio + duracion;
-    return inicio >= 8 * 60 && fin <= 17 * 60;
-  };
-
-  function getMaxHora(duracion) {
-    if (!duracion) return "17:00";
-    const fin = 17 * 60 - duracion;
-    const hours = Math.floor(fin / 60);
-    const minutes = fin % 60;
-    return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
+    return inicio >= rangoHoy.inicio && fin <= rangoHoy.fin;
   }
 
   const handleSlotSelect = (hora) => {
     setHoraCita(hora);
     setSelectedSlot(hora);
   };
+
+  // Sincronización visual: Reiniciar la selección si deja de ser válida al cambiar fecha o servicio
+  useEffect(() => {
+    if (horaCita && !isHorarioValido(horaCita, servicioSeleccionado?.DuracionMinutos || 0, fechaCita)) {
+      setHoraCita("");
+      setSelectedSlot("");
+    }
+  }, [fechaCita, servicioID]);
 
   // Obtener datos para los selects al cargar el componente
   useEffect(() => {
@@ -151,9 +204,14 @@ export default function Menu() {
       alert("Por favor selecciona un servicio válido");
       return;
     }
-    if (!isHorarioValido(horaCita, servicioSeleccionado.DuracionMinutos)) {
+
+    if (!rangoHoy) {
+      alert("La clínica está cerrada el día seleccionado");
+      return;
+    }
+    if (!isHorarioValido(horaCita, servicioSeleccionado.DuracionMinutos, fechaCita)) {
       alert(
-        `La hora seleccionada no es válida para el servicio elegido. El horario debe ser entre 08:00 y ${horaMaxima}`
+        `La hora seleccionada no es válida. El horario para este día es de ${horariosConfig[getDiaSemana(fechaCita)]}`
       );
       return;
     }
@@ -448,11 +506,11 @@ export default function Menu() {
               }}
               disabled={loading}
               step="900"
-              min="08:00"
+              min={horaMinima}
               max={horaMaxima}
             />
             <p className="mt-2 text-sm text-white/70">
-              Los horarios son válidos de 08:00 hasta 17:00, ajustados a la duración del servicio.
+              Horario para {getDiaSemana(fechaCita) || "el día"}: {horariosConfig[getDiaSemana(fechaCita)] || "Selecciona una fecha"}.
               {servicioSeleccionado ? (
                 <span> Este servicio dura {servicioSeleccionado.DuracionMinutos} minutos.</span>
               ) : null}
@@ -465,6 +523,9 @@ export default function Menu() {
             servicioDuracion={servicioSeleccionado?.DuracionMinutos}
             onSelectHora={handleSlotSelect}
             horaSeleccionada={selectedSlot}
+            horaMinima={horaMinima}
+            horaMaxima={horaMaxima}
+            isCerrado={!rangoHoy}
           />
 
           {/* Notas */}

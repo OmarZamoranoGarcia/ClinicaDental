@@ -37,8 +37,38 @@ export default function Servicios() {
     costo: "",
     activo: true
   });
+
+  // Estado para los horarios (un solo objeto como fuente de verdad)
+  const [horarios, setHorarios] = useState({
+    "Lunes": "8:00 AM - 6:00 PM",
+    "Martes": "8:00 AM - 6:00 PM",
+    "Miércoles": "8:00 AM - 6:00 PM",
+    "Jueves": "8:00 AM - 6:00 PM",
+    "Viernes": "8:00 AM - 6:00 PM",
+    "Sábado": "8:00 AM - 3:00 PM",
+    "Domingo": "Cerrado"
+  });
+
+  const [diaEditando, setDiaEditando] = useState(null);
+  const [valorTempHorario, setValorTempHorario] = useState("");
   const [editando, setEditando] = useState(null);
+
+  const [telefono, setTelefono] = useState("664 234 567 890");
+  const [editandoTelefono, setEditandoTelefono] = useState(false);
+  const [valorTempTelefono, setValorTempTelefono] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // Cargar horarios de localStorage al iniciar
+  useEffect(() => {
+    const savedHorarios = localStorage.getItem("clinica_horarios");
+    if (savedHorarios) {
+      setHorarios(JSON.parse(savedHorarios));
+    }
+    const savedTelefono = localStorage.getItem("clinica_telefono");
+    if (savedTelefono) {
+      setTelefono(savedTelefono);
+    }
+  }, []);
 
   // Cargar los servicios desde la API
   const cargarServicios = async () => {
@@ -209,6 +239,38 @@ export default function Servicios() {
       activo: true
     });
     setEditando(null);
+  };
+
+  // Funciones para la gestión de horarios
+  const iniciarEdicionHorario = (dia, valor) => {
+    setDiaEditando(dia);
+    setValorTempHorario(valor);
+  };
+
+  const guardarHorario = () => {
+    // Validación básica de formato
+    const regex = /^(\d{1,2}:\d{2}\s?(AM|PM))\s?-\s?(\d{1,2}:\d{2}\s?(AM|PM))$/i;
+    if (valorTempHorario !== "Cerrado" && !regex.test(valorTempHorario)) {
+      alert("Formato inválido. Usa por ejemplo: '8:00 AM - 6:00 PM' o 'Cerrado'");
+      return;
+    }
+
+    const nuevosHorarios = { ...horarios, [diaEditando]: valorTempHorario };
+    setHorarios(nuevosHorarios);
+    localStorage.setItem("clinica_horarios", JSON.stringify(nuevosHorarios));
+    setDiaEditando(null);
+    alert("Horario actualizado localmente");
+  };
+
+  const guardarTelefono = () => {
+    if (!valorTempTelefono.trim()) {
+      alert("El teléfono no puede estar vacío");
+      return;
+    }
+    setTelefono(valorTempTelefono);
+    localStorage.setItem("clinica_telefono", valorTempTelefono);
+    setEditandoTelefono(false);
+    alert("Teléfono actualizado");
   };
 
   if (loading && servicios.length === 0) {
@@ -507,6 +569,142 @@ export default function Servicios() {
               )}
             </div>
           </form>
+        </div>
+
+        {/* SECCIÓN DE GESTIÓN DE HORARIOS (GUI) */}
+        <div className="mt-16 mb-10">
+          <h2 className="text-2xl font-bold mb-6" style={{ color: "var(--white)" }}>
+            GESTIÓN DE HORARIOS
+          </h2>
+          <div 
+            className="overflow-hidden rounded-2xl border shadow-2xl"
+            style={{ borderColor: "var(--light_gray)", backgroundColor: "var(--main_gray)" }}
+          >
+            <table className="w-full">
+              <thead>
+                <tr className="bg-gradient-to-r from-[var(--main_blue)] to-[#4AC7FF]">
+                  <th className="p-4 text-left text-[var(--main_black)] font-semibold">Día</th>
+                  <th className="p-4 text-left text-[var(--main_black)] font-semibold">Horario</th>
+                  <th className="p-4 text-center text-[var(--main_black)] font-semibold">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {Object.entries(horarios).map(([dia, valor]) => (
+                  <tr key={dia} className="border-t border-[var(--light_gray)] hover:bg-[var(--main_blue)]/5 transition-colors">
+                    <td className="p-4 font-medium text-[var(--white)]">{dia}</td>
+                    <td className="p-4">
+                      {diaEditando === dia ? (
+                        <input
+                          type="text"
+                          value={valorTempHorario}
+                          onChange={(e) => setValorTempHorario(e.target.value)}
+                          className="bg-[var(--light_gray)] text-[var(--white)] border border-[var(--main_blue)] rounded px-2 py-1 w-full focus:outline-none"
+                          autoFocus
+                        />
+                      ) : (
+                        <span className={valor === "Cerrado" ? "text-red-400" : "text-[var(--white)]/80"}>
+                          {valor}
+                        </span>
+                      )}
+                    </td>
+                    <td className="p-4 text-center">
+                      {diaEditando === dia ? (
+                        <div className="flex justify-center gap-2">
+                          <button
+                            onClick={guardarHorario}
+                            className="bg-[#10B981] text-white px-3 py-1 rounded text-xs hover:bg-emerald-600"
+                          >
+                            Guardar
+                          </button>
+                          <button
+                            onClick={() => setDiaEditando(null)}
+                            className="bg-gray-500 text-white px-3 py-1 rounded text-xs hover:bg-gray-600"
+                          >
+                            Cancelar
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => iniciarEdicionHorario(dia, valor)}
+                          className="text-[var(--main_blue)] hover:text-[#4AC7FF] transition-colors flex items-center gap-1 mx-auto text-sm"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                          </svg>
+                          Editar
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* SECCIÓN DE GESTIÓN DE CONTACTO */}
+        <div className="mt-8 mb-10">
+          <h2 className="text-2xl font-bold mb-6" style={{ color: "var(--white)" }}>
+            GESTIÓN DE CONTACTO
+          </h2>
+          <div 
+            className="p-6 rounded-2xl border shadow-2xl flex items-center justify-between"
+            style={{ borderColor: "var(--light_gray)", backgroundColor: "var(--main_gray)" }}
+          >
+            <div className="flex items-center gap-4">
+              <div className="p-3 rounded-full bg-[var(--main_blue)]/10 text-[var(--main_blue)]">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                </svg>
+              </div>
+              <div>
+                <p className="text-sm text-white/50 uppercase font-semibold">Número de Teléfono</p>
+                {editandoTelefono ? (
+                  <input
+                    type="text"
+                    value={valorTempTelefono}
+                    onChange={(e) => setValorTempTelefono(e.target.value)}
+                    className="bg-[var(--light_gray)] text-[var(--white)] border border-[var(--main_blue)] rounded px-2 py-1 w-64 focus:outline-none text-xl font-light"
+                    autoFocus
+                  />
+                ) : (
+                  <p className="text-2xl font-light tracking-wider text-[var(--white)]">{telefono}</p>
+                )}
+              </div>
+            </div>
+            
+            <div>
+              {editandoTelefono ? (
+                <div className="flex gap-2">
+                  <button
+                    onClick={guardarTelefono}
+                    className="bg-[#10B981] text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-emerald-600 transition-colors"
+                  >
+                    Guardar
+                  </button>
+                  <button
+                    onClick={() => setEditandoTelefono(false)}
+                    className="bg-gray-500 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-gray-600 transition-colors"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => {
+                    setValorTempTelefono(telefono);
+                    setEditandoTelefono(true);
+                  }}
+                  className="text-[var(--main_blue)] hover:text-[#4AC7FF] transition-colors flex items-center gap-2 font-semibold"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                  </svg>
+                  Cambiar número
+                </button>
+              )}
+            </div>
+          </div>
         </div>
       </main>
     </div>

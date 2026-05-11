@@ -6,6 +6,16 @@ import { useEffect, useState } from "react";
 export default function Home() {
   const router = useRouter();
   const [servicios, setServicios] = useState([]);
+  const [horarios, setHorarios] = useState({
+    "Lunes": "8:00 AM - 6:00 PM",
+    "Martes": "8:00 AM - 6:00 PM",
+    "Miércoles": "8:00 AM - 6:00 PM",
+    "Jueves": "8:00 AM - 6:00 PM",
+    "Viernes": "8:00 AM - 6:00 PM",
+    "Sábado": "8:00 AM - 3:00 PM",
+    "Domingo": "Cerrado"
+  });
+  const [telefono, setTelefono] = useState("664 234 567 890");
 
   // Cargar servicios desde la base de datos
   useEffect(() => {
@@ -20,6 +30,15 @@ export default function Home() {
         console.error("Error al cargar los servicios:", error);
       }
     };
+
+    const savedHorarios = localStorage.getItem("clinica_horarios");
+    if (savedHorarios) {
+      setHorarios(JSON.parse(savedHorarios));
+    }
+    const savedTelefono = localStorage.getItem("clinica_telefono");
+    if (savedTelefono) {
+      setTelefono(savedTelefono);
+    }
 
     fetchServicios();
   }, []);
@@ -221,24 +240,16 @@ export default function Home() {
                       </tr>
                     </thead>
                     <tbody>
-                      {[
-                        ["Lunes", "8:00 AM - 6:00 PM"],
-                        ["Martes", "8:00 AM - 6:00 PM"],
-                        ["Miércoles", "8:00 AM - 6:00 PM"],
-                        ["Jueves", "8:00 AM - 6:00 PM"],
-                        ["Viernes", "8:00 AM - 6:00 PM"],
-                        ["Sábado", "8:00 AM - 3:00 PM"],
-                        ["Domingo", "Cerrado"],
-                      ].map((row, index) => (
+                      {Object.entries(horarios).map(([dia, valor], index) => (
                         <tr
                           key={index}
                           className="border-t border-[var(--light_gray)] hover:bg-[var(--main_blue)]/5 transition-colors duration-200"
                         >
-                          <td className="p-4 font-medium">{row[0]}</td>
+                          <td className="p-4 font-medium">{dia}</td>
                           <td
-                            className={`p-4 ${row[1] === "Cerrado" ? "text-red-400" : "text-[var(--white)]/80"}`}
+                            className={`p-4 ${valor === "Cerrado" ? "text-red-400" : "text-[var(--white)]/80"}`}
                           >
-                            {row[1]}
+                            {valor}
                           </td>
                         </tr>
                       ))}
@@ -252,7 +263,7 @@ export default function Home() {
                   📞 Teléfono
                 </h4>
                 <span className="text-2xl font-light tracking-wider">
-                  664 234 567 890
+                  {telefono}
                 </span>
                 <p className="text-sm text-[var(--white)]/50 mt-4">
                   Llámanos para agendar tu cita o resolver tus dudas
